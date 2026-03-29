@@ -1,17 +1,14 @@
-import java.sql.Connection;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            Connection conn = DBConnection.getConnection();
-
-            if (conn != null && !conn.isClosed()) {
-                System.out.println("Veritabanı bağlantısı başarıyla kuruldu.");
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                // Senin arayüz sınıfının adı neyse onu buraya yaz:
+                LibrarySystemUI gui = new LibrarySystemUI();
+                gui.setVisible(true); // Pencereyi görünür yap
             }
-
-        } catch (Exception e) {
-            System.out.println("Bağlantı sırasında bir hata oluştu!");
-            e.printStackTrace();
-        }
+        });
     }
 }
