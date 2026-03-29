@@ -1,15 +1,17 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-
 import java.sql.Connection;
-class Test{
+
+public class Main {
     public static void main(String[] args) {
         try {
             Connection conn = DBConnection.getConnection();
-            System.out.println("BAĞLANTI BAŞARILI!");
+
+            if (conn != null && !conn.isClosed()) {
+                System.out.println("Veritabanı bağlantısı başarıyla kuruldu.");
+            }
+
         } catch (Exception e) {
+            System.out.println("Bağlantı sırasında bir hata oluştu!");
             e.printStackTrace();
         }
-
     }
 }
