@@ -3,30 +3,30 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 public class LibrarySystemUI extends JFrame {
-    private JTextField txtMemberId , txtBookId;
-    private JButton btnLoan , btnExit;
-    private LoanDAO loanDAO; //Veritabanı ile iletişim.
+    private JTextField txtMemberId, txtBookId;
+    private JButton btnLoan, btnExit;
+    private LoanDAO loanDAO;
 
-    public LibrarySystemUI(){
+    public LibrarySystemUI() {
         setTitle("Kütüphane Otomasyon Sistemi");
-        setSize(900,750);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Çarpı işaretine basınca kapatmayı sağlar.
-        setLocationRelativeTo(null); //Uygulamanın tam ortaya açılmasını sağlar.
+        setSize(900, 750);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
+        // 4 satır, 2 sütunluk ana şablon (Toplam 8 kutu alacak)
         setLayout(new GridLayout(4, 2, 15, 15));
         loanDAO = new LoanDAO();
 
-        //ÜYE İŞLEMLERİ PANELİ
-        add(createSectionPanel("Üye İşlemleri", new String[]{"Üye Ekle", "Üye Ara", "Üye Düzenle"})); //String kullanılmasının sebebi buton isimlerinin bir dizi gibi sıralanmasıdır.
+        // 1. KUTU: ÜYE İŞLEMLERİ PANELİ
+        add(createSectionPanel("Üye İşlemleri", new String[]{"Üye Ekle", "Üye Ara", "Üye Düzenle"}));
 
-        //KİTAP İŞLEMLERİ PANELİ
-        JPanel pnlBook = createSectionPanel("Kitap İşlemleri", new String[]{"Kitap Ekle" , "Kitap Ara" , "Kitap Düzenle"});
+        // 2. KUTU: KİTAP İŞLEMLERİ PANELİ
+        JPanel pnlBook = createSectionPanel("Kitap İşlemleri", new String[]{"Kitap Ekle", "Kitap Ara", "Kitap Düzenle"});
         pnlBook.add(new JLabel("Kategori:"));
-        pnlBook.add(new JComboBox<>(new String[]{"Roman", "Bilim", "Tarih", "Yazılım" , "Masal" , "Biyografi" , "Siyaset" , "Kişisel Gelişim"}));
+        pnlBook.add(new JComboBox<>(new String[]{"Roman", "Bilim", "Tarih", "Yazılım", "Masal", "Biyografi", "Siyaset", "Kişisel Gelişim"}));
         add(pnlBook);
 
-        //ÖDÜNÇ VERME VE İADE PANELİ
-
+        // 3. KUTU: ÖDÜNÇ VERME VE İADE PANELİ
         JPanel pnlLoan = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlLoan.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "Ödünç Verme ve İade", TitledBorder.LEFT, TitledBorder.TOP));
@@ -37,7 +37,7 @@ public class LibrarySystemUI extends JFrame {
 
         pnlLoan.add(new JLabel("Kitap Numarası: "));
         txtBookId = new JTextField();
-        pnlLoan.add(txtBookId); // pnlLoan içine eklendi
+        pnlLoan.add(txtBookId);
 
         pnlLoan.add(new JLabel(" İşlem Tipi:"));
         pnlLoan.add(new JComboBox<>(new String[]{"Ödünç", "İade"}));
@@ -48,13 +48,36 @@ public class LibrarySystemUI extends JFrame {
         pnlLoan.add(new JButton("İade Al"));
         add(pnlLoan);
 
-        //KATEGORİ YÖNETİMİ
+        // 4. KUTU: KATEGORİ YÖNETİMİ
         add(createSectionPanel("Kategori Yönetimi", new String[]{"Kategori Ekle", "Kategori Düzenle"}));
 
-        //YAZAR İŞLEMLERİ
-        add(createSectionPanel("Yazar İşlemleri", new String[]{"Yazar Ekle", "Yazar Düzenle"}));
+        // 5. KUTU: YAZAR İŞLEMLERİ PANELİ (Yeni Tasarımımız)
+        JPanel pnlAuthor = new JPanel(new GridLayout(4, 2, 5, 5));
+        pnlAuthor.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "Yazar İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
 
-        //CEZA İŞLEMLERİ PANELİ
+        pnlAuthor.add(new JLabel(" Yazar Adı: "));
+        JTextField txtAuthorName = new JTextField();
+        pnlAuthor.add(txtAuthorName);
+
+        pnlAuthor.add(new JLabel(" Yazar Soyadı: "));
+        JTextField txtAuthorSurname = new JTextField();
+        pnlAuthor.add(txtAuthorSurname);
+
+        pnlAuthor.add(new JLabel(" Biyografi: "));
+        JTextField txtAuthorBio = new JTextField();
+        pnlAuthor.add(txtAuthorBio);
+
+        JButton btnSaveAuthor = new JButton("Yazar Ekle");
+        btnSaveAuthor.setBackground(new Color(153, 204, 153));
+        pnlAuthor.add(btnSaveAuthor);
+
+        JButton btnEditAuthor = new JButton("Yazar Düzenle");
+        pnlAuthor.add(btnEditAuthor);
+
+        add(pnlAuthor);
+
+        // 6. KUTU: CEZA İŞLEMLERİ PANELİ
         JPanel pnlFine = new JPanel(new FlowLayout());
         pnlFine.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "Para Cezası İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
@@ -63,36 +86,66 @@ public class LibrarySystemUI extends JFrame {
         pnlFine.add(btnCheckFine);
         add(pnlFine);
 
-        //RAPORLAR VE ÇIKIŞ PANELİ
+        // 7. KUTU: RAPORLAR PANELİ
         JPanel pnlReports = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         pnlReports.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Raporlar", TitledBorder.LEFT, TitledBorder.TOP));
         pnlReports.add(new JButton("Ödünç Raporu"));
         pnlReports.add(new JButton("Stok Raporu"));
         add(pnlReports);
 
+        // 8. KUTU: ÇIKIŞ PANELİ
         JPanel pnlFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnExit = new JButton("ÇIKIŞ");
         btnExit.setBackground(new Color(211, 47, 47));
         btnExit.setForeground(Color.BLACK);
         pnlFooter.add(btnExit);
-
-        // PANELLERİ ANA PENCEREYE EKLEME
-        add(pnlLoan);
-        add(pnlFine);
         add(pnlFooter);
 
+
+        // ------------------------------------------------------------------
+        // BUTON İŞLEVLERİ (ACTION LISTENERS) - Tıklanınca Ne Olacak?
+        // ------------------------------------------------------------------
+
+        // YAZAR EKLE BUTONU (Yeni Eklenen Görev)
+        btnSaveAuthor.addActionListener(e -> {
+            String name = txtAuthorName.getText();
+            String surname = txtAuthorSurname.getText();
+            String bio = txtAuthorBio.getText();
+
+            if (name.isEmpty() || surname.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Lütfen Ad ve Soyad alanlarını doldurunuz!");
+                return;
+            }
+
+            AuthorDAO dao = new AuthorDAO();
+            if (dao.addAuthor(name, surname, bio)) {
+                JOptionPane.showMessageDialog(this, "Yazar başarıyla eklendi!");
+                // Ekrana başarıyla eklendikten sonra kutuların içini temizle
+                txtAuthorName.setText("");
+                txtAuthorSurname.setText("");
+                txtAuthorBio.setText("");
+            } else {
+                JOptionPane.showMessageDialog(this, "Kayıt sırasında veritabanı hatası oluştu!");
+            }
+        });
+
+        // ÖDÜNÇ VER BUTONU
         btnLoan.addActionListener(e -> {
             try {
                 int mId = Integer.parseInt(txtMemberId.getText());
                 int bId = Integer.parseInt(txtBookId.getText());
-                boolean sonuc = loanDAO.IssueLoan(mId, bId);
+
+                // Hata düzeltildi: Büyük I yerine küçük i kullanıldı (issueLoan)
+                boolean sonuc = loanDAO.issueLoan(mId, bId);
+
                 if (sonuc) JOptionPane.showMessageDialog(this, "Kitap teslimi başarılı.");
-                else JOptionPane.showMessageDialog(this, "Kitap teslim başarısız.");
+                else JOptionPane.showMessageDialog(this, "Kitap teslim başarısız. Stok yetersiz veya üye/kitap numarası yanlış.");
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Lütfen geçerli sayısal bir numara giriniz.");
             }
         });
 
+        // CEZA HESAPLA BUTONU
         btnCheckFine.addActionListener(e -> {
             String input = JOptionPane.showInputDialog(this, "Sorgulanacak Ödünç Numarasını giriniz:");
             if (input != null && !input.isEmpty()) {
@@ -107,10 +160,14 @@ public class LibrarySystemUI extends JFrame {
             }
         });
 
-        btnExit.addActionListener(e -> System.exit(0)); //Programı kapatmayı sağlar.
+        // ÇIKIŞ BUTONU
+        btnExit.addActionListener(e -> System.exit(0));
 
-        setVisible(true); //Panelin ekranda görünmesini sağlar.
+        // Ekranı görünür yap
+        setVisible(true);
     }
+
+    // Arayüzdeki diğer butonları hızlıca oluşturmak için cerenin yazdığı yardımcı metot
     private JPanel createSectionPanel(String title, String[] buttons) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, TitledBorder.LEFT, TitledBorder.TOP));
@@ -124,7 +181,8 @@ public class LibrarySystemUI extends JFrame {
         try {
             int mId = Integer.parseInt(txtMemberId.getText());
             int bId = Integer.parseInt(txtBookId.getText());
-            if (loanDAO.IssueLoan(mId, bId)) JOptionPane.showMessageDialog(this, "İşlem Başarılı!");
+            // Hata düzeltildi: Büyük I yerine küçük i kullanıldı (issueLoan)
+            if (loanDAO.issueLoan(mId, bId)) JOptionPane.showMessageDialog(this, "İşlem Başarılı!");
             else JOptionPane.showMessageDialog(this, "Hata: Stok yetersiz!");
         } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Geçersiz ID!"); }
     }
@@ -137,4 +195,3 @@ public class LibrarySystemUI extends JFrame {
         }
     }
 }
-
