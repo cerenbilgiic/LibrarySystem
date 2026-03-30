@@ -1,43 +1,55 @@
 import java.time.LocalDate;
 
-public class loans {
+public class loans { // Sınıf adını Java standartlarına uygun olarak büyük harfle başlattık
     private int id;
-    private LocalDate loan_date;
-    private LocalDate due_date;
-    private LocalDate return_date;
+    private LocalDate loanDate; // Alt çizgi yerine camelCase kullandık
+    private LocalDate dueDate;
+    private LocalDate returnDate;
     private String status;
-    private int user_id;
-    private int book_id;
+    private int userId;
+    private int bookId;
 
-    public loans(int id , LocalDate loan_date , LocalDate due_date , LocalDate return_date , String status , int user_id , int book_id){
-        this.id=id;
-        this.loan_date=loan_date;
-        this.due_date=due_date;
-        this.return_date=return_date;
-        this.status=status;
-        this.user_id=user_id;
-        this.book_id=book_id;
+    // 1. ORİJİNAL CONSTRUCTOR (Veritabanından tam veri çekerken kullanılacak)
+    public loans(int id, LocalDate loanDate, LocalDate dueDate, LocalDate returnDate, String status, int userId, int bookId) {
+        this.id = id;
+        this.loanDate = loanDate;
+        this.dueDate = dueDate;
+        this.returnDate = returnDate;
+        this.status = status;
+        this.userId = userId;
+        this.bookId = bookId;
     }
 
-    public int getId(){return id ;}
-    public void setId(int id){this.id = id ;}
+    // 2. YENİ EKLENEN CONSTRUCTOR (LoanFactory'nin sorunsuz çalışması için gereken 5 parametreli metot)
+    public loans(LocalDate loanDate, LocalDate dueDate, String status, int userId, int bookId) {
+        this.loanDate = loanDate;
+        this.dueDate = dueDate;
+        this.status = status;
+        this.userId = userId;
+        this.bookId = bookId;
+        // id'yi veritabanı otomatik verecek, returnDate (iade tarihi) ise henüz iade edilmediği için boş.
+    }
 
-    public LocalDate getLoan_date(){return loan_date ;}
-    public void setLoan_date(LocalDate loan_date){this.loan_date= loan_date ;}
+    // --- GETTER VE SETTER METOTLARI ---
 
-    public LocalDate getDue_date(){return due_date ;}
-    public void setDue_date(LocalDate due_date){this.due_date = due_date ;}
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public LocalDate getReturn_date(){return return_date ;}
-    public void setReturn_date(LocalDate return_date){this.return_date = return_date ;}
+    public LocalDate getLoanDate() { return loanDate; }
+    public void setLoanDate(LocalDate loanDate) { this.loanDate = loanDate; }
 
-    public String getStatus(){return status ;}
-    public void setStatus(String status){this.status=status ;}
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
-    public int getUser_id(){return user_id ;}
-    public void setUser_id(int user_id){this.user_id = user_id ;}
+    public LocalDate getReturnDate() { return returnDate; }
+    public void setReturnDate(LocalDate returnDate) { this.returnDate = returnDate; }
 
-    public int getBook_id(){return book_id ;}
-    public void setBook_id(int book_id){this.book_id = book_id ;}
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
+
+    public int getBookId() { return bookId; }
+    public void setBookId(int bookId) { this.bookId = bookId; }
 }
