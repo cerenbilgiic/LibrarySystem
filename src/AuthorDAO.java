@@ -8,7 +8,7 @@ public class AuthorDAO {
 
     // 1. Veritabanına Yeni Yazar Ekleme İşlemi (CREATE)
     public boolean addAuthor(String authorName, String authorSurname, String biography) {
-        // SQL Ekleme Sorgumuz:
+        // SQL Ekleme Sorgumuz: Senin tablodaki kolon isimleriyle birebir aynı
         String sql = "INSERT INTO authors (author_name, author_surname, biography) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
@@ -37,13 +37,13 @@ public class AuthorDAO {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-               
+                //  SQL tablosundaki kolon isimlerini birebir çekiyoruz
                 int id = rs.getInt("id");
                 String name = rs.getString("author_name");
                 String surname = rs.getString("author_surname");
                 String bio = rs.getString("biography");
 
-                //'authors' sınıfının beklediği 4 bilgiyi sırasıyla veriyoruz 
+                //  'authors' sınıfının beklediği 4 bilgiyi sırasıyla veriyoruz
                 authors newAuthor = new authors(id, name, surname, bio);
 
                 authorList.add(newAuthor);
