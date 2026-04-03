@@ -20,7 +20,7 @@ public class CategoryDAO {
         }
     }
 
-    // 2. Kategori Güncelleme (UPDATE)
+    // 2. Kategori Güncelleme (Hata veren eksik metot buydu!)
     public boolean updateCategory(int id, String name, String description) {
         String sql = "UPDATE categories SET category_name = ?, description = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -35,7 +35,7 @@ public class CategoryDAO {
         }
     }
 
-    // 3. ID ile Tek Bir Kategori Getirme (READ SINGLE)
+    // 3. ID ile Tek Bir Kategori Getirme (Diğer hata veren eksik metot buydu!)
     public categories getCategoryById(int id) {
         String sql = "SELECT * FROM categories WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -43,6 +43,7 @@ public class CategoryDAO {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                // categories sınıfına uygun nesne üretiliyor
                 return new categories(
                         rs.getInt("id"), 
                         rs.getString("category_name"), 
