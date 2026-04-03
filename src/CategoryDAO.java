@@ -3,7 +3,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-
 public class CategoryDAO {
 
     // 1. Yeni Kategori Ekleme
