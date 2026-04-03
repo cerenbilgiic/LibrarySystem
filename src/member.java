@@ -4,7 +4,7 @@ public class member extends users{
     //bu özellikler üyeye özel eklenenlerdir.
 
     private LocalDate membershipDate; // Üyelik başlangıç tarihi
-    private int maxAllowedbooks;// Alabileceği maksimum kitap sayısı
+    private int maxAllowedbooks=5;// Alabileceği maksimum kitap sayısı
 
     public member(int id, String first_name , String last_name , String email , String password , String role , LocalDate created_date , LocalDate membershipDate , int maxAllowedbooks){
        //user classının özelliklerinin girişi yapılıyor.
