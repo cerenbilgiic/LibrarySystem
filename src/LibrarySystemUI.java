@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 
 public class LibrarySystemUI extends JFrame {
     private JTextField txtMemberId, txtBookId;
+    private JTextField txtIsbn, txtBookName, txtAuthorId, txtCatId; // Kitap ara için bunları yukarı taşıdık
     private JButton btnLoan, btnExit;
     private LoanDAO loanDAO;
 
@@ -18,7 +19,7 @@ public class LibrarySystemUI extends JFrame {
         setLayout(new GridLayout(4, 2, 15, 15));
         loanDAO = new LoanDAO();
 
-        // Ölü butonlar için genel uyarı
+        // Henüz kodlanmamış butonlar için genel uyarı mesajı
         ActionListener comingSoon = e -> {
             JButton source = (JButton) e.getSource();
             JOptionPane.showMessageDialog(this,
@@ -26,7 +27,9 @@ public class LibrarySystemUI extends JFrame {
                     "Bilgi", JOptionPane.INFORMATION_MESSAGE);
         };
 
-        // --- 1. ÜYE İŞLEMLERİ ---
+        // ---------------------------------------------------------
+        // 1. KUTU: ÜYE İŞLEMLERİ
+        // ---------------------------------------------------------
         JPanel pnlMember = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlMember.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Üye İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
         pnlMember.add(new JLabel(" Adı:"));
@@ -45,19 +48,21 @@ public class LibrarySystemUI extends JFrame {
         pnlMember.add(btnSearchMember);
         add(pnlMember);
 
-        // --- 2. KİTAP İŞLEMLERİ ---
+        // ---------------------------------------------------------
+        // 2. KUTU: KİTAP İŞLEMLERİ
+        // ---------------------------------------------------------
         JPanel pnlBook = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlBook.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Kitap İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
         pnlBook.add(new JLabel(" ISBN:"));
-        JTextField txtIsbn = new JTextField();
+        txtIsbn = new JTextField();
         pnlBook.add(txtIsbn);
         pnlBook.add(new JLabel(" Kitap Adı:"));
-        JTextField txtBookName = new JTextField();
+        txtBookName = new JTextField();
         pnlBook.add(txtBookName);
         pnlBook.add(new JLabel(" Yazar/Kat ID:"));
         JPanel pnlBookIds = new JPanel(new GridLayout(1, 2, 5, 0));
-        JTextField txtAuthorId = new JTextField();
-        JTextField txtCatId = new JTextField();
+        txtAuthorId = new JTextField();
+        txtCatId = new JTextField();
         pnlBookIds.add(txtAuthorId);
         pnlBookIds.add(txtCatId);
         pnlBook.add(pnlBookIds);
@@ -65,17 +70,18 @@ public class LibrarySystemUI extends JFrame {
         btnAddBook.setBackground(new Color(153, 204, 153));
         pnlBook.add(btnAddBook);
         JButton btnSearchBook = new JButton("Kitap Ara");
-        btnSearchBook.addActionListener(comingSoon);
         pnlBook.add(btnSearchBook);
         add(pnlBook);
 
-        // --- 3. ÖDÜNÇ VERME VE İADE ---
+        // ---------------------------------------------------------
+        // 3. KUTU: ÖDÜNÇ VERME VE İADE
+        // ---------------------------------------------------------
         JPanel pnlLoan = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlLoan.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Ödünç Verme ve İade", TitledBorder.LEFT, TitledBorder.TOP));
-        pnlLoan.add(new JLabel(" Üye Numarası: "));
+        pnlLoan.add(new JLabel(" Üye No: "));
         txtMemberId = new JTextField();
         pnlLoan.add(txtMemberId);
-        pnlLoan.add(new JLabel(" Kitap Numarası: "));
+        pnlLoan.add(new JLabel(" Kitap No: "));
         txtBookId = new JTextField();
         pnlLoan.add(txtBookId);
         pnlLoan.add(new JLabel(" İşlem Tipi:"));
@@ -88,17 +94,18 @@ public class LibrarySystemUI extends JFrame {
         pnlLoan.add(btnReturnLoan);
         add(pnlLoan);
 
-        // --- 4. KATEGORİ YÖNETİMİ ---
+        // ---------------------------------------------------------
+        // 4. KUTU: KATEGORİ YÖNETİMİ
+        // ---------------------------------------------------------
         JPanel pnlCategory = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlCategory.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Kategori Yönetimi", TitledBorder.LEFT, TitledBorder.TOP));
         pnlCategory.add(new JLabel(" Kategori Adı:"));
-        JTextField txtCatNameInput = new JTextField();
-        pnlCategory.add(txtCatNameInput);
+        JTextField txtCatNameIn = new JTextField();
+        pnlCategory.add(txtCatNameIn);
         pnlCategory.add(new JLabel(" Açıklama:"));
-        JTextField txtCatDescInput = new JTextField();
-        pnlCategory.add(txtCatDescInput);
-        pnlCategory.add(new JLabel("")); 
-        pnlCategory.add(new JLabel(""));
+        JTextField txtCatDescIn = new JTextField();
+        pnlCategory.add(txtCatDescIn);
+        pnlCategory.add(new JLabel("")); pnlCategory.add(new JLabel(""));
         JButton btnAddCat = new JButton("Kategori Ekle");
         btnAddCat.setBackground(new Color(153, 204, 153));
         pnlCategory.add(btnAddCat);
@@ -106,26 +113,30 @@ public class LibrarySystemUI extends JFrame {
         pnlCategory.add(btnEditCat);
         add(pnlCategory);
 
-        // --- 5. YAZAR İŞLEMLERİ ---
+        // ---------------------------------------------------------
+        // 5. YAZAR İŞLEMLERİ
+        // ---------------------------------------------------------
         JPanel pnlAuthor = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlAuthor.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Yazar İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
         pnlAuthor.add(new JLabel(" Yazar Adı: "));
-        JTextField txtAuthorName = new JTextField();
-        pnlAuthor.add(txtAuthorName);
+        JTextField txtAuthN = new JTextField();
+        pnlAuthor.add(txtAuthN);
         pnlAuthor.add(new JLabel(" Yazar Soyadı: "));
-        JTextField txtAuthorSurname = new JTextField();
-        pnlAuthor.add(txtAuthorSurname);
+        JTextField txtAuthS = new JTextField();
+        pnlAuthor.add(txtAuthS);
         pnlAuthor.add(new JLabel(" Biyografi: "));
-        JTextField txtAuthorBio = new JTextField();
-        pnlAuthor.add(txtAuthorBio);
-        JButton btnSaveAuthor = new JButton("Yazar Ekle");
-        btnSaveAuthor.setBackground(new Color(153, 204, 153));
-        pnlAuthor.add(btnSaveAuthor);
-        JButton btnEditAuthor = new JButton("Yazar Düzenle");
-        pnlAuthor.add(btnEditAuthor);
+        JTextField txtAuthB = new JTextField();
+        pnlAuthor.add(txtAuthB);
+        JButton btnAddAuth = new JButton("Yazar Ekle");
+        btnAddAuth.setBackground(new Color(153, 204, 153));
+        pnlAuthor.add(btnAddAuth);
+        JButton btnEditAuth = new JButton("Yazar Düzenle");
+        pnlAuthor.add(btnEditAuth);
         add(pnlAuthor);
 
-        // --- 6, 7, 8: CEZA, RAPOR, ÇIKIŞ ---
+        // ---------------------------------------------------------
+        // 6, 7, 8: CEZA, RAPOR, ÇIKIŞ
+        // ---------------------------------------------------------
         JPanel pnlFine = new JPanel(new FlowLayout());
         pnlFine.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Ceza İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
         JButton btnCheckFine = new JButton("Ceza Hesapla");
@@ -134,95 +145,106 @@ public class LibrarySystemUI extends JFrame {
 
         JPanel pnlReports = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         pnlReports.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Raporlar", TitledBorder.LEFT, TitledBorder.TOP));
-        JButton btnLRep = new JButton("Ödünç Raporu"); btnLRep.addActionListener(comingSoon);
-        JButton btnSRep = new JButton("Stok Raporu"); btnSRep.addActionListener(comingSoon);
-        pnlReports.add(btnLRep); pnlReports.add(btnSRep);
+        JButton btnLoanRep = new JButton("Ödünç Raporu"); btnLoanRep.addActionListener(comingSoon);
+        JButton btnStockRep = new JButton("Stok Raporu"); btnStockRep.addActionListener(comingSoon);
+        pnlReports.add(btnLoanRep); pnlReports.add(btnStockRep);
         add(pnlReports);
 
         JPanel pnlFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnExit = new JButton("ÇIKIŞ"); btnExit.setBackground(new Color(211, 47, 47));
         pnlFooter.add(btnExit); add(pnlFooter);
 
-        // ================= ACTION LISTENERS =================
+        // ================= ACTION LISTENERS (ETKİLEŞİMLER) =================
 
-        // KATEGORİ DÜZENLE (Yeni Akıllı Sistem)
+        // KİTAP ARA (Yeni!)
+        btnSearchBook.addActionListener(e -> {
+            String idIn = JOptionPane.showInputDialog(this, "Aranacak Kitap ID girin:");
+            if (idIn != null && !idIn.isEmpty()) {
+                try {
+                    books b = new BookDAO().getBookById(Integer.parseInt(idIn));
+                    if (b != null) {
+                        txtIsbn.setText(b.getIsbn());
+                        txtBookName.setText(b.getBook_name());
+                        txtAuthorId.setText(String.valueOf(b.getAuthor_id()));
+                        txtCatId.setText(String.valueOf(b.getCategory_id()));
+                        JOptionPane.showMessageDialog(this, "Kitap bulundu ve kutucuklara dolduruldu.");
+                    } else { JOptionPane.showMessageDialog(this, "Kitap bulunamadı!"); }
+                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Geçersiz ID!"); }
+            }
+        });
+
+        // KATEGORİ DÜZENLE
         btnEditCat.addActionListener(e -> {
-            String idInput = JOptionPane.showInputDialog(this, "Düzenlenecek Kategori ID numarasını giriniz:");
-            if (idInput != null && !idInput.isEmpty()) {
+            String idIn = JOptionPane.showInputDialog(this, "Düzenlenecek Kategori ID:");
+            if (idIn != null && !idIn.isEmpty()) {
                 try {
-                    int catId = Integer.parseInt(idInput);
                     CategoryDAO dao = new CategoryDAO();
-                    categories existing = dao.getCategoryById(catId);
-                    
-                    if (existing != null) {
-                        JTextField fName = new JTextField(existing.getCategory_name());
-                        JTextField fDesc = new JTextField(existing.getDescription());
-                        Object[] msg = {"Kategori Adı:", fName, "Açıklama:", fDesc};
-
-                        int option = JOptionPane.showConfirmDialog(this, msg, "Kategori Güncelle (ID: " + catId + ")", JOptionPane.OK_CANCEL_OPTION);
-                        if (option == JOptionPane.OK_OPTION) {
-                            if (dao.updateCategory(catId, fName.getText(), fDesc.getText())) {
-                                JOptionPane.showMessageDialog(this, "Kategori başarıyla güncellendi!");
-                            }
+                    categories exCat = dao.getCategoryById(Integer.parseInt(idIn));
+                    if (exCat != null) {
+                        JTextField fN = new JTextField(exCat.getCategory_name());
+                        JTextField fD = new JTextField(exCat.getDescription());
+                        Object[] msg = {"Ad:", fN, "Açıklama:", fD};
+                        if (JOptionPane.showConfirmDialog(this, msg, "Kategori Güncelle", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                            if (dao.updateCategory(exCat.getId(), fN.getText(), fD.getText()))
+                                JOptionPane.showMessageDialog(this, "Güncellendi!");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Kategori bulunamadı!");
-                    }
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Geçersiz ID!"); }
+                    } else { JOptionPane.showMessageDialog(this, "Bulunamadı!"); }
+                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Hata!"); }
             }
         });
 
-        // YAZAR DÜZENLE (Mevcut Akıllı Sistem)
-        btnEditAuthor.addActionListener(e -> {
-            String idInput = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar ID numarasını giriniz:");
-            if (idInput != null && !idInput.isEmpty()) {
+        // YAZAR DÜZENLE
+        btnEditAuth.addActionListener(e -> {
+            String idIn = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar ID:");
+            if (idIn != null && !idIn.isEmpty()) {
                 try {
-                    int authorId = Integer.parseInt(idInput);
                     AuthorDAO dao = new AuthorDAO();
-                    authors existing = dao.getAuthorById(authorId);
-                    if (existing != null) {
-                        JTextField fName = new JTextField(existing.getAuthor_name());
-                        JTextField fSurname = new JTextField(existing.getAuthor_surname());
-                        JTextField fBio = new JTextField(existing.getBiography());
-                        Object[] msg = {"Ad:", fName, "Soyad:", fSurname, "Biyografi:", fBio};
-
-                        int option = JOptionPane.showConfirmDialog(this, msg, "Yazar Güncelle (ID: " + authorId + ")", JOptionPane.OK_CANCEL_OPTION);
-                        if (option == JOptionPane.OK_OPTION) {
-                            if (dao.updateAuthor(authorId, fName.getText(), fSurname.getText(), fBio.getText())) {
-                                JOptionPane.showMessageDialog(this, "Yazar güncellendi!");
-                            }
+                    authors exAut = dao.getAuthorById(Integer.parseInt(idIn));
+                    if (exAut != null) {
+                        JTextField fN = new JTextField(exAut.getAuthor_name());
+                        JTextField fS = new JTextField(exAut.getAuthor_surname());
+                        JTextField fB = new JTextField(exAut.getBiography());
+                        Object[] msg = {"Ad:", fN, "Soyad:", fS, "Bio:", fB};
+                        if (JOptionPane.showConfirmDialog(this, msg, "Yazar Güncelle", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                            if (dao.updateAuthor(exAut.getId(), fN.getText(), fS.getText(), fB.getText()))
+                                JOptionPane.showMessageDialog(this, "Güncellendi!");
                         }
-                    } else { JOptionPane.showMessageDialog(this, "Yazar bulunamadı!"); }
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Geçersiz ID!"); }
+                    } else { JOptionPane.showMessageDialog(this, "Bulunamadı!"); }
+                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Hata!"); }
             }
         });
 
-        // DİĞER EKLEME İŞLEMLERİ
+        // EKLEME İŞLEMLERİ
+        btnAddBook.addActionListener(e -> {
+            try {
+                books b = new books(0, txtIsbn.getText(), txtBookName.getText(), LocalDate.now(), Integer.parseInt(txtAuthorId.getText()), Integer.parseInt(txtCatId.getText()));
+                new BookDAO().addBook(b);
+                JOptionPane.showMessageDialog(this, "Kitap eklendi!");
+            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Girişleri kontrol edin!"); }
+        });
+
         btnAddCat.addActionListener(e -> {
-            if (new CategoryDAO().addCategory(txtCatNameInput.getText(), txtCatDescInput.getText())) {
+            if (new CategoryDAO().addCategory(txtCatNameIn.getText(), txtCatDescIn.getText()))
                 JOptionPane.showMessageDialog(this, "Kategori eklendi!");
-                txtCatNameInput.setText(""); txtCatDescInput.setText("");
-            }
         });
 
-        btnSaveAuthor.addActionListener(e -> {
-            if (new AuthorDAO().addAuthor(txtAuthorName.getText(), txtAuthorSurname.getText(), txtAuthorBio.getText())) {
+        btnAddAuth.addActionListener(e -> {
+            if (new AuthorDAO().addAuthor(txtAuthN.getText(), txtAuthS.getText(), txtAuthB.getText()))
                 JOptionPane.showMessageDialog(this, "Yazar eklendi!");
-                txtAuthorName.setText(""); txtAuthorSurname.setText(""); txtAuthorBio.setText("");
-            }
         });
 
+        // DİĞER
         btnLoan.addActionListener(e -> {
             try {
-                if (loanDAO.issueLoan(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText()))) {
-                    JOptionPane.showMessageDialog(this, "Ödünç verildi.");
-                } else { JOptionPane.showMessageDialog(this, "Hata!"); }
-            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Sayısal ID girin!"); }
+                if (loanDAO.issueLoan(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText())))
+                    JOptionPane.showMessageDialog(this, "Başarılı!");
+                else JOptionPane.showMessageDialog(this, "Hata!");
+            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Sayı girin!"); }
         });
 
         btnCheckFine.addActionListener(e -> {
-            String input = JOptionPane.showInputDialog(this, "Ödünç No:");
-            if (input != null) JOptionPane.showMessageDialog(this, "Borç: " + loanDAO.calculateAndGetFine(Integer.parseInt(input)) + " TL");
+            String in = JOptionPane.showInputDialog(this, "Ödünç No:");
+            if (in != null) JOptionPane.showMessageDialog(this, "Borç: " + loanDAO.calculateAndGetFine(Integer.parseInt(in)) + " TL");
         });
 
         btnExit.addActionListener(e -> System.exit(0));
