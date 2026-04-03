@@ -16,7 +16,7 @@ public class eBook extends books {
     }
 
     public void download() {
-        System.out.println(getName()  + format + " formatında indiriliyor...");
+        System.out.println(getBook_name() + format + " formatında indiriliyor...");
     }
 
     public double getFileSize() { return fileSize; }
