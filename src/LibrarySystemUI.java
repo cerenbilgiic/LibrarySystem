@@ -20,38 +20,6 @@ public class LibrarySystemUI extends JFrame {
 
         //ÜYE İŞLEMLERİ PANELİ
         add(createSectionPanel("Üye İşlemleri", new String[]{"Üye Ekle", "Üye Ara", "Üye Düzenle"})); //String kullanılmasının sebebi buton isimlerinin bir dizi gibi sıralanmasıdır.
-        // Üye Ekle Butonunun ActionListner'ı
-        btnUserAdd.addActionListener(e -> {
-            // 1. Bilgileri kullanıcıdan al
-            String first_name = JOptionPane.showInputDialog(this, "Üye Adı:");
-            String last_name = JOptionPane.showInputDialog(this, "Üye Soyadı:");
-            String email = JOptionPane.showInputDialog(this, "E-posta Adresi:");
-            String role = JOptionPane.showInputDialog(this, "Üye ");
-            LocalDate created_date = LocalDate.now();
-            LocalDate membershipDate = LocalDate.now();
-            int MaxAllowedbooks = Integer.parseInt();
-
-            if (first_name != null && last_name != null && !first_name.isEmpty()) {
-
-                String[] roles = {"Üye", "Çalışan"};
-                JComboBox<String> cmbRole = new JComboBox<>(roles);
-                pnlUserAdd.add(new JLabel("Yetki Rolü:"));
-                pnlUserAdd.add(cmbRole);
-
-                // 2. Member nesnesi oluştur (ID otomatik artacağı için 0 verebilirsin)
-
-                member newMember = new member(0, first_name, last_name, email, role , created_date , membershipDate, maxAllowedbooks,password"");
-
-                // 3. DAO üzerinden veritabanına kaydet
-                MemberDAO mDao = new MemberDAO();
-                if (mDao.saveMember(newMember)) {
-                    JOptionPane.showMessageDialog(this, "Üye başarıyla kaydedildi!");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Hata: Üye kaydedilemedi.", "Hata", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
         //KİTAP İŞLEMLERİ PANELİ
         JPanel pnlBook = createSectionPanel("Kitap İşlemleri", new String[]{"Kitap Ekle" , "Kitap Ara" , "Kitap Düzenle"});
         pnlBook.add(new JLabel("Kategori:"));
