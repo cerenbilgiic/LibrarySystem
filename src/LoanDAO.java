@@ -26,14 +26,15 @@ public class LoanDAO {
                 // 2. ADIM: Loans tablosuna kaydet
                 String insertLoan = "INSERT INTO loans (user_id, book_id, loan_date, due_date, status) VALUES (?, ?, ?, ?, 'Aktif')";
                 PreparedStatement psLoan = conn.prepareStatement(insertLoan);
-                psLoan.setInt(1, userId);
-                psLoan.setInt(2, bookId);
-                
-                LocalDate today = LocalDate.now();
-                LocalDate dueDate = today.plusDays(15);
-                
-                psLoan.setDate(3, java.sql.Date.valueOf(today));
-                psLoan.setDate(4, java.sql.Date.valueOf(dueDate));
+
+                // --- FACTORY PATTERN BURADA DEVREYE GİRİYOR! ---
+                // Tarihleri ve temel bilgileri kendi yazdığımız Factory sınıfından çekiyoruz
+                loans newLoan = LoanFactory.createNewLoan(userId, bookId);
+
+                psLoan.setInt(1, newLoan.getUserId());
+                psLoan.setInt(2, newLoan.getBookId());
+                psLoan.setDate(3, java.sql.Date.valueOf(newLoan.getLoanDate()));
+                psLoan.setDate(4, java.sql.Date.valueOf(newLoan.getDueDate()));
                 psLoan.executeUpdate();
 
                 // 3. ADIM: Kitap stok sayısını 1 azalt
@@ -45,9 +46,9 @@ public class LoanDAO {
                 conn.commit();
                 return true;
             } else {
-                return false; 
+                return false;
             }
-        } catch (Exception e) { // <-- HATA BURADA DÜZELTİLDİ (SQLException yerine Exception yapıldı)
+        } catch (Exception e) {
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
@@ -63,7 +64,7 @@ public class LoanDAO {
     // 2. Ceza Hesaplama ve Fines Tablosuna Ekleme İşlemi
     public double calculateAndGetFine(int loanId) {
         double fineAmount = 0.0;
-        
+
         try (Connection conn = DBConnection.getConnection()) {
             String sql = "SELECT loan_date, return_date FROM loans WHERE id = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -77,7 +78,7 @@ public class LoanDAO {
                     LocalDate today = LocalDate.now();
 
                     long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(loanDate, today);
-                    
+
                     if (daysBetween > 15) {
                         fineAmount = (daysBetween - 15) * 5.0;
 
@@ -91,7 +92,7 @@ public class LoanDAO {
                     }
                 }
             }
-        } catch (Exception e) { // <-- HATA BURADA DÜZELTİLDİ
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return fineAmount;
