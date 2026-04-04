@@ -11,25 +11,20 @@ public class MemberDAO {
     }
 
     // ÜYE EKLE
-    public boolean addMember(member member) {
+    public boolean addMember(String first_name , String last_name ,String email ,String password) {
+        String sql = "INSERT INTO users (first_name , last_name , email , password) VALUES (?, ?, ?, ?)";
 
-        String sql = "INSERT INTO members " +
-                "(first_name, last_name, email, role, max_allowed_books) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            pstmt.setString(1, first_name);
+            pstmt.setString(2, last_name);
+            pstmt.setString(3, email);
+            pstmt.setString(4, password);
+            return pstmt.executeUpdate() > 0;
 
-            ps.setInt(1, member.getId());
-            ps.setString(2, member.getFirst_name());
-            ps.setString(3, member.getLast_name());
-            ps.setString(4, member.getEmail());
-            ps.setString(6, member.getRole());
-            ps.setInt(9, member.getMaxAllowedbooks());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.out.println("Member ekleme hatası: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -54,7 +49,6 @@ public class MemberDAO {
                         rs.getString("email"),
                         rs.getString("password"),
                         rs.getString("role"),
-                        rs.getDate("created_date").toLocalDate(),
                         rs.getDate("membership_date").toLocalDate(),
                         rs.getInt("max_allowed_books")
                 );
@@ -85,7 +79,6 @@ public class MemberDAO {
                         rs.getString("email"),
                         rs.getString("password"),
                         rs.getString("role"),
-                        rs.getDate("created_date").toLocalDate(),
                         rs.getDate("membership_date").toLocalDate(),
                         rs.getInt("max_allowed_books")
                 ));

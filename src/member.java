@@ -6,9 +6,10 @@ public class member extends users{
     private LocalDate membershipDate; // Üyelik başlangıç tarihi
     private int maxAllowedbooks=5;// Alabileceği maksimum kitap sayısı
 
-    public member(int id, String first_name , String last_name , String email , String password , String role , LocalDate created_date , LocalDate membershipDate , int maxAllowedbooks){
+    public member(int id, String first_name , String last_name , String email , String password , String role ,  LocalDate membershipDate , int maxAllowedbooks){
        //user classının özelliklerinin girişi yapılıyor.
-        super(id , first_name , last_name , email , password, role , created_date);
+        super(id , first_name , last_name , email , password, role , membershipDate);
+        role= "Kütüphane Üyesi";
 
         this.membershipDate=membershipDate;
         this.maxAllowedbooks=5;

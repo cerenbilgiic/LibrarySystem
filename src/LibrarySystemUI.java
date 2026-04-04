@@ -72,21 +72,21 @@ public class LibrarySystemUI extends JFrame {
 
         pnlMember.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Üye İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
         pnlMember.add(new JLabel(" Adı:"));
-        JTextField txtMemName = new JTextField();
-        pnlMember.add(txtMemName);
+        JTextField txtMemberName = new JTextField();
+        pnlMember.add(txtMemberName);
 
         pnlMember.add(new JLabel(" Soyadı:"));
-        JTextField txtMemSurname = new JTextField();
-        pnlMember.add(txtMemSurname);
+        JTextField txtMemberSurname = new JTextField();
+        pnlMember.add(txtMemberSurname);
 
         pnlMember.add(new JLabel(" E-Posta:"));
-        JTextField txtMemEmail = new JTextField();
-        pnlMember.add(txtMemEmail);
+        JTextField txtMemberEmail = new JTextField();
+        pnlMember.add(txtMemberEmail);
 
 
         pnlMember.add(new JLabel(" Şifre:"));
-        JTextField txtMemPass = new JTextField();
-        pnlMember.add(txtMemPass);
+        JTextField txtMemberPass = new JTextField();
+        pnlMember.add(txtMemberPass);
 
         JButton btnAddMember = new JButton("Üye Ekle");
         pnlMember.add(btnAddMember);
@@ -98,27 +98,9 @@ public class LibrarySystemUI extends JFrame {
         add(pnlMember);
 
         //Üye ekleme işlemi.
-
         btnAddMember.addActionListener(e -> {
-            try {
-                member m = new member(
-                        0,
-                        txtMemName.getText(),
-                        txtMemSurname.getText(),
-                        txtMemEmail.getText(),
-                        txtMemPass.getText(),
-                        "member",
-                        LocalDate.now(),
-                        LocalDate.now(),
-                        5
-                );
-
-                JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Hata oluştu!");
-            }
+            if (new MemberDAO().addMember(txtMemberName.getText(),txtAuthorSurname.getText(),txtMemberEmail.getText(),txtMemberPass.getText()));
+                JOptionPane.showMessageDialog(this, "Üye eklendi!");
         });
 
         // KİTAP İŞLEMLERİ
@@ -375,6 +357,26 @@ public class LibrarySystemUI extends JFrame {
                 }
             }
         });
+        // YAZAR DÜZENLE
+        btnEditAuthor.addActionListener(e -> {
+            String NameIn = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar Adı:");
+            if (NameIn != null && !NameIn.isEmpty()) {
+                try {
+                    AuthorDAO dao = new AuthorDAO();
+                    authors exAut = dao.getAuthorByName(txtAuthorName.getText() , txtAuthorSurname.getText());
+                    if (exAut != null) {
+                        JTextField fN = new JTextField(exAut.getAuthor_name());
+                        JTextField fS = new JTextField(exAut.getAuthor_surname());
+                        JTextField fB = new JTextField(exAut.getBiography());
+                        Object[] msg = {"Ad:", fN, "Soyad:", fS, "Bio:", fB};
+                        if (JOptionPane.showConfirmDialog(this, msg, "Yazar Güncelle", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                            if (dao.updateAuthor(exAut.getId(), fN.getText(), fS.getText(), fB.getText()))
+                                JOptionPane.showMessageDialog(this, "Güncellendi!");
+                        }
+                    } else { JOptionPane.showMessageDialog(this, "Bulunamadı!"); }
+                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Hata!"); }
+            }
+        });
 
         // CEZA, RAPOR, ÇIKIŞ
 
@@ -432,26 +434,7 @@ public class LibrarySystemUI extends JFrame {
             }
         });
 
-        // YAZAR DÜZENLE
-        btnEditAuthor.addActionListener(e -> {
-            String idIn = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar ID:");
-            if (idIn != null && !idIn.isEmpty()) {
-                try {
-                    AuthorDAO dao = new AuthorDAO();
-                    authors exAut = dao.getAuthorById(Integer.parseInt(idIn));
-                    if (exAut != null) {
-                        JTextField fN = new JTextField(exAut.getAuthor_name());
-                        JTextField fS = new JTextField(exAut.getAuthor_surname());
-                        JTextField fB = new JTextField(exAut.getBiography());
-                        Object[] msg = {"Ad:", fN, "Soyad:", fS, "Bio:", fB};
-                        if (JOptionPane.showConfirmDialog(this, msg, "Yazar Güncelle", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                            if (dao.updateAuthor(exAut.getId(), fN.getText(), fS.getText(), fB.getText()))
-                                JOptionPane.showMessageDialog(this, "Güncellendi!");
-                        }
-                    } else { JOptionPane.showMessageDialog(this, "Bulunamadı!"); }
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Hata!"); }
-            }
-        });
+
 
         // DİĞER
         btnLoan.addActionListener(e -> {

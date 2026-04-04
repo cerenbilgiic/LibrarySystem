@@ -90,7 +90,7 @@ public class AuthorDAO {
             return false;
         }
     }
-    // 3. Veritabanındaki Yazarı Güncelleme İşlemi (UPDATE)
+    // Yazarı Güncelleme İşlemi (UPDATE)
     public boolean updateAuthor(int id, String authorName, String authorSurname, String biography) {
         String sql = "UPDATE authors SET author_name = ?, author_surname = ?, biography = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
