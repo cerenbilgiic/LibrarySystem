@@ -8,9 +8,9 @@ public class eBook extends books {
     //PDF,DOCX vb. cinsinden format belirtir.
     private String format;
 
-    public eBook(int id , String isbn , String name , LocalDate publish_year , int author_id , int category_id ,double fileSize, String format) {
+    public eBook(int id , String isbn , String name , LocalDate publish_year , int author_id ,int category_id , String author_name, String author_surname, String category_name ,double fileSize, String format) {
         // Üst sınıf olan Book'un constructor'ına verileri gönderir
-        super(id, isbn,name,publish_year,author_id,category_id);
+        super(id, isbn,name,publish_year,author_id,category_id, author_name, author_surname, category_name);
         this.fileSize = fileSize;
         this.format = format;
     }
