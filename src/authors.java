@@ -11,7 +11,6 @@ public class authors {
         this.author_name = author_name;
         this.author_surname = author_surname;
         this.biography = biography;
-
     }
 //verileri doğrudan dışarıya açmak yerine kontrollü erişmeyi sağlayan kod bloğu.
 
@@ -26,6 +25,5 @@ public class authors {
 
     public String getBiography(){return biography ;}
     public void setBiography(String biography){this.biography = biography ;}
-
 }
 

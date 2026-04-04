@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 
 public class LibrarySystemUI extends JFrame {
     private JTextField txtMemberId, txtBookId , txtAuthorName ,txtAuthorSurname;
-    private JTextField txtIsbn, txtBookName; // Kitap ara için bunları yukarı taşıdık
+    private JTextField txtIsbn, txtBookName;
     private JComboBox<String> selectCategory;
     private JButton btnLoan, btnExit;
     private LoanDAO loanDAO;
@@ -123,7 +123,7 @@ public class LibrarySystemUI extends JFrame {
 
         // KİTAP İŞLEMLERİ
 
-        JPanel pnlBook = new JPanel(new GridLayout(4, 4, 10, 10));
+        JPanel pnlBook = new JPanel(new GridLayout(4, 4, 5, 5));
         pnlBook.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Kitap İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
 
 
@@ -207,7 +207,6 @@ public class LibrarySystemUI extends JFrame {
                     boolean success = new BookDAO().deleteBook(b.getId());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Kitap başarıyla silindi!");
-                        // Kutucukları temizle
                         txtIsbn.setText("");
                         txtBookName.setText("");
                         txtAuthorName.setText("");
@@ -218,7 +217,7 @@ public class LibrarySystemUI extends JFrame {
             }
         });
 
-       //ÖDÜNÇ VERME VE İADE
+        //ÖDÜNÇ VERME VE İADE
 
         JPanel pnlLoan = new JPanel(new GridLayout(4, 2, 5, 5));
         pnlLoan.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Ödünç Verme ve İade", TitledBorder.LEFT, TitledBorder.TOP));
@@ -280,45 +279,102 @@ public class LibrarySystemUI extends JFrame {
 
         // YAZAR İŞLEMLERİ
 
-        JPanel pnlAuthor = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel pnlAuthor = new JPanel(new GridLayout(3, 4, 5, 5));
         pnlAuthor.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Yazar İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
 
 
         pnlAuthor.add(new JLabel(" Yazar Adı: "));
-        JTextField txtAuthN = new JTextField();
-        pnlAuthor.add(txtAuthN);
+        JTextField txtAuthorName = new JTextField();
+        pnlAuthor.add(txtAuthorName);
 
         pnlAuthor.add(new JLabel(" Yazar Soyadı: "));
-        JTextField txtAuthS = new JTextField();
-        pnlAuthor.add(txtAuthS);
+        JTextField txtAuthorSurname = new JTextField();
+        pnlAuthor.add(txtAuthorSurname);
 
         pnlAuthor.add(new JLabel(" Biyografi: "));
-        JTextField txtAuthB = new JTextField();
-        pnlAuthor.add(txtAuthB);
+        JTextField txtAuthorBiography = new JTextField();
+        pnlAuthor.add(txtAuthorBiography);
 
-        JButton btnAddAuth = new JButton("Yazar Ekle");
-        btnAddAuth.setBackground(new Color(153, 204, 153));
-        pnlAuthor.add(btnAddAuth);
+        JButton btnAddAuthor= new JButton("Yazar Ekle");
+        btnAddAuthor.setBackground(new Color(153, 204, 153));
+        pnlAuthor.add(btnAddAuthor);
 
-        JButton btnEditAuth = new JButton("Yazar Düzenle");
-        pnlAuthor.add(btnEditAuth);
+        JButton btnEditAuthor = new JButton("Yazar Düzenle");
+        pnlAuthor.add(btnEditAuthor);
         add(pnlAuthor);
 
-        //Yazar ekleme.
-        btnAddAuth.addActionListener(e -> {
-            if (new AuthorDAO().addAuthor(txtAuthN.getText(), txtAuthS.getText(), txtAuthB.getText()))
-                JOptionPane.showMessageDialog(this, "Yazar eklendi!");
-        });
-
-        //Yazar arama.
         JButton btnSearchAuthor = new JButton("Yazar Ara");
         pnlAuthor.add(btnSearchAuthor);
         add(pnlAuthor);
 
-        //Yazar silme.
         JButton btnDeleteAuthor = new JButton("Yazar Sil");
         pnlAuthor.add(btnDeleteAuthor);
         add(pnlAuthor);
+
+
+        //Yazar ekleme.
+        btnAddAuthor.addActionListener(e -> {
+            if (new AuthorDAO().addAuthor(txtAuthorName.getText(), txtAuthorSurname.getText(), txtAuthorBiography.getText()))
+                JOptionPane.showMessageDialog(this, "Yazar eklendi!");
+        });
+
+        //Yazar arama.
+        btnSearchAuthor.addActionListener(e -> {
+            String NameIn = JOptionPane.showInputDialog(this, "Aranacak Yazar Adını Girin:");
+
+            if (NameIn != null && !NameIn.trim().isEmpty()) {
+                try {
+
+                    String[] parts = NameIn.trim().split(" ");
+
+                    String name = parts[0];
+                    String surname = parts.length > 1 ? parts[1] : "";
+
+                    authors author = new AuthorDAO().getAuthorByName(name, surname);
+
+                    if (author != null) {
+                        txtAuthorName.setText(author.getAuthor_name());
+                        txtAuthorSurname.setText(author.getAuthor_surname());
+                        txtAuthorBiography.setText(author.getBiography());
+                        JOptionPane.showMessageDialog(this, "Yazar bulundu ve kutucuklara dolduruldu.");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Yazar bulunamadı!");
+                    }
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+                }
+            }
+        });
+
+        //Yazar silme.
+        btnDeleteAuthor.addActionListener(e -> {
+            String fullName = txtAuthorName.getText().trim() + " " + txtAuthorSurname.getText().trim();
+
+            if (fullName.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Lütfen silinecek yazarı önce aratın!");
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    fullName + " isimli yazarı silmek istediğinize emin misiniz?",
+                    "Silme Onayı", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                authors author = new AuthorDAO().getAuthorByName(txtAuthorName.getText(), txtAuthorSurname.getText());
+                if (author != null) {
+                    boolean success = new AuthorDAO().DeleteAuthor(author.getAuthor_name());
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Yazar başarıyla silindi!");
+                        txtAuthorName.setText("");
+                        txtAuthorSurname.setText("");
+                        txtAuthorBiography.setText("");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Kitap silinemedi! (Ödünç verilmiş olabilir)");
+                    }
+                }
+            }
+        });
 
         // CEZA, RAPOR, ÇIKIŞ
 
@@ -377,7 +433,7 @@ public class LibrarySystemUI extends JFrame {
         });
 
         // YAZAR DÜZENLE
-        btnEditAuth.addActionListener(e -> {
+        btnEditAuthor.addActionListener(e -> {
             String idIn = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar ID:");
             if (idIn != null && !idIn.isEmpty()) {
                 try {

@@ -1,6 +1,8 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,14 +32,64 @@ public class AuthorDAO {
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 authorList.add(new authors(
-                        rs.getInt("id"), rs.getString("author_name"),
-                        rs.getString("author_surname"), rs.getString("biography")
+                        rs.getInt("id"),
+                        rs.getString("author_name"),
+                        rs.getString("author_surname"),
+                        rs.getString("biography")
                 ));
             }
         } catch (Exception e) { e.printStackTrace(); }
         return authorList;
     }
 
+    //Yazar arama.
+    public authors getAuthorByName(String author_name, String author_surname) {
+
+        String sql = "SELECT * FROM authors " +
+                "WHERE LOWER(TRIM(author_name)) = LOWER(TRIM(?)) " +
+                "AND LOWER(TRIM(author_surname)) = LOWER(TRIM(?))";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, author_name.trim());
+            pstmt.setString(2, author_surname.trim());
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return new authors(
+                        rs.getInt("id"),
+                        rs.getString("author_name"),
+                        rs.getString("author_surname"),
+                        rs.getString("biography")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    //Yazar silme.
+    public boolean DeleteAuthor(String authorName) {
+        String sql = "DELETE FROM authors WHERE author_name = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, authorName);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0; // Silme başarılıysa true döner
+
+        } catch (SQLException e) {
+            System.out.println("Yazar silinirken SQL hatası oluştu!");
+            e.printStackTrace();
+            return false;
+        }
+    }
     // 3. Veritabanındaki Yazarı Güncelleme İşlemi (UPDATE)
     public boolean updateAuthor(int id, String authorName, String authorSurname, String biography) {
         String sql = "UPDATE authors SET author_name = ?, author_surname = ?, biography = ? WHERE id = ?";

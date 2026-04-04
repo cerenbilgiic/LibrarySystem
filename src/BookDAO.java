@@ -26,7 +26,7 @@ public class BookDAO {
         }
     }
 
-    // 2. Kitap Arama (Yine senin sütun isimlerine göre: name, publish_year)
+    // 2. Kitap Arama
     public books getBookByName(String name) {
         // LOWER kullanarak harf duyarlılığını ortadan kaldırıyoruz
         String sql = "SELECT b.*, a.author_name, a.author_surname, c.category_name " +
