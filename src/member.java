@@ -2,21 +2,15 @@ import java.time.LocalDate;
 
 public class member extends users{
     //bu özellikler üyeye özel eklenenlerdir.
-
-    private LocalDate membershipDate; // Üyelik başlangıç tarihi
     private int maxAllowedbooks=5;// Alabileceği maksimum kitap sayısı
 
-    public member(int id, String first_name , String last_name , String email , String password , String role ,  LocalDate membershipDate , int maxAllowedbooks){
+    public member(int id, String first_name , String last_name , String email , String password , String role , LocalDate created_at , int maxAllowedbooks){
        //user classının özelliklerinin girişi yapılıyor.
-        super(id , first_name , last_name , email , password, role , membershipDate);
+        super(id , first_name , last_name , email , password, role , created_at );
         role= "Kütüphane Üyesi";
 
-        this.membershipDate=membershipDate;
         this.maxAllowedbooks=5;
     }
-
-    public LocalDate getMembershipDate(){return membershipDate ;}
-    public void setMembershipDate(LocalDate membershipDate){this.membershipDate = membershipDate ;}
 
     public int getMaxAllowedbooks(){return maxAllowedbooks ;}
     public void setMaxAllowedbooks(int maxAllowedbooks){this.maxAllowedbooks=maxAllowedbooks ;}

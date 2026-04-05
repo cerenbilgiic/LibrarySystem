@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 public class CategoryDAO {
@@ -34,15 +35,15 @@ public class CategoryDAO {
         }
     }
 
-    // 3. ID ile Tek Bir Kategori Getirme (Diğer hata veren eksik metot buydu!)
-    public categories getCategoryById(int id) {
-        String sql = "SELECT * FROM categories WHERE id = ?";
+    // Kategori arama
+    public categories getCategoryByName(String name) {
+        String sql = "SELECT * FROM categories WHERE category_name = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
+            pstmt.setString(1, name);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                // categories sınıfına uygun nesne üretiliyor
+
                 return new categories(
                         rs.getInt("id"), 
                         rs.getString("category_name"), 
@@ -66,4 +67,24 @@ public class CategoryDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+
+    //kategori silme
+    public boolean deleteCategory(int category_id) {
+        String sql = "DELETE FROM categories WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, category_id);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Silme hatası: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

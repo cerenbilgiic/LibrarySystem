@@ -1,178 +1,287 @@
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.LocalDate;
-import java.awt.event.ActionListener;
 
 public class LibrarySystemUI extends JFrame {
-    private JTextField txtMemberId, txtBookId , txtAuthorName ,txtAuthorSurname;
-    private JTextField txtIsbn, txtBookName;
-    private JComboBox<String> selectCategory;
-    private JButton btnLoan, btnExit;
-    private LoanDAO loanDAO;
 
+    private JPanel cardPanel;
+    private CardLayout cardLayout;
+
+    // Form alanları
+    private JTextField txtMemberName, txtMemberSurname, txtMemberEmail, txtMemberPass;
+    private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography;
+    private JTextField txtMemberId, txtBookId,txtCategoryId, txtAuthorId, txtCatNameIn , txtCategoryDescrption;
+    private JComboBox<String> selectCategory;
+    private JButton btnSearchBook;
+
+    JTextField txtBookAuthorName;
+    JTextField txtBookAuthorSurname;
+
+    // DAO - (Dosyaların projesinde mevcut olduğu varsayılıyor)
+    private LoanDAO loanDAO = new LoanDAO();
+    private MemberDAO memberDAO = new MemberDAO();
+    private BookDAO bookDAO = new BookDAO();
+    private AuthorDAO authorDAO = new AuthorDAO();
+    private CategoryDAO categoryDAO = new CategoryDAO();
+
+    private String loggedUserName = "";
+
+
+    // Giriş sonrası çalışan Constructor
+    public LibrarySystemUI(String name) {
+        this.loggedUserName = name;
+        initUI();
+    }
+
+    // Direkt çalıştırma için varsayılan Constructor
     public LibrarySystemUI() {
-        setTitle("Kütüphane Otomasyon Sistemi");
-        setSize(950, 780);
+        initUI();
+    }
+
+    private void initUI() {
+        setTitle("SafeHaven | Kütüphane Otomasyon Sistemi");
+        setSize(1100, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JTabbedPane tabs = new JTabbedPane();
+        // --- 1. CARDLAYOUT VE ANA PANEL HAZIRLIĞI ---
+        // CRITICAL: Önce layout nesnesi oluşturulmalı!
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(Color.WHITE);
 
-        setLayout(new GridLayout(5, 2, 15, 15));
-        loanDAO = new LoanDAO();
+        // --- 2. WELCOME PANELİ ---
+        JPanel pnlWelcome = new JPanel(new GridBagLayout());
+        pnlWelcome.setBackground(Color.WHITE);
 
-        // Henüz kodlanmamış butonlar için genel uyarı mesajı
-        ActionListener comingSoon = e -> {
-            JButton source = (JButton) e.getSource();
-            JOptionPane.showMessageDialog(this,
-                    source.getText() + " modülü Faz-2 kapsamında geliştirilecektir.",
-                    "Bilgi", JOptionPane.INFORMATION_MESSAGE);
-        };
+        // HATA DÜZELTME: txtMemberName.getText() yerine constructor'dan gelen loggedUserName kullanıldı.
+        JLabel lblWelcome = new JLabel("<html><div style='text-align: center;'>"
+                + "<h1 style='color: #2d3436; font-family: sans-serif;'>KÜTÜPHANE SİSTEMİNE HOŞ GELDİN</h1>"
+                + "<h2 style='color: #0984e3; font-family: sans-serif;'>" + loggedUserName.toUpperCase() + "</h2>"
+                + "<p style='color: #636e72; margin-top: 20px;'>Lütfen soldaki menüden işlem seçiniz.</p>"
+                + "</div></html>");
+        pnlWelcome.add(lblWelcome);
 
-        //GİRİŞ İŞLEMLERİ
-        JTextField txtUsername = new JTextField();
-        JPasswordField txtPassword = new JPasswordField();
-        JButton btnLogin = new JButton("Giriş Yap");
+       //CARDPANELE PANELLERİ EKLEME
+        cardPanel.add(pnlWelcome, "pnlWelcome");
+        cardPanel.add(createMemberPanel(), "pnlMember");
+        cardPanel.add(createBookPanel(), "pnlBook");
+        cardPanel.add(createLoanPanel(), "pnlLoan");
+        cardPanel.add(createAuthorPanel(), "pnlAuthor");
+        cardPanel.add(createCategoryPanel(),"pnlCategory");
 
-        btnLogin.addActionListener(e -> {
-            // 1. Kullanıcıdan verileri al (Hata: newString birleşik olmamalı)
-            String email = txtUsername.getText();
-            String pass = new String(txtPassword.getPassword());
+        // --- 4. SIDEBAR (SOL MENÜ) ---
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setBackground(new Color(45, 52, 54));
+        sidebar.setPreferredSize(new Dimension(220, 0));
+        sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-            // 2. Boş alan kontrolü (Profesyonel bir dokunuş)
-            if (email.isEmpty() || pass.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Lütfen tüm alanları doldurun!", "Uyarı", JOptionPane.WARNING_MESSAGE);
+        JLabel lblTitle = new JLabel("YÖNETİM PANELİ");
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sidebar.add(lblTitle);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 30)));
+
+        sidebar.add(createMenuButton("Ana Sayfa", "pnlWelcome"));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createMenuButton("Üye İşlemleri", "pnlMember"));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createMenuButton("Kitap İşlemleri", "pnlBook"));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createMenuButton("Ödünç / İade", "pnlLoan"));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createMenuButton("Yazar İşlemleri", "pnlAuthor"));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createMenuButton("Kategori İşlemleri", "pnlCategory"));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
+
+        sidebar.add(Box.createVerticalGlue());
+
+        JButton btnExit = new JButton("GÜVENLİ ÇIKIŞ");
+        btnExit.setBackground(new Color(211, 47, 47));
+        btnExit.setForeground(Color.BLACK);
+        btnExit.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnExit.addActionListener(e -> System.exit(0));
+        sidebar.add(btnExit);
+
+        // --- 5. ANA YERLEŞİM ---
+        JPanel mainContainer = new JPanel(new BorderLayout());
+        mainContainer.add(sidebar, BorderLayout.WEST);
+        mainContainer.add(cardPanel, BorderLayout.CENTER);
+
+        add(mainContainer);
+
+        // Başlangıç ekranını göster
+        cardLayout.show(cardPanel, "pnlWelcome");
+    }
+
+    private JButton createMenuButton(String text, String cardName) {
+        JButton btn = new JButton(text);
+        btn.setMaximumSize(new Dimension(200, 45));
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setFocusPainted(false);
+        btn.addActionListener(e -> cardLayout.show(cardPanel, cardName));
+        return btn;
+    }
+
+    //ÜYE İŞLEMLERİ
+
+    //üye ekleme işlemi.
+
+    private JPanel createMemberPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Üye Yönetim Sistemi"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        txtMemberName = new JTextField(15);
+        txtMemberSurname = new JTextField(15);
+        txtMemberEmail = new JTextField(15);
+        txtMemberPass = new JTextField(15);
+
+        addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
+        addComponent(panel, txtMemberName, 1, 0, gbc);
+        addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
+        addComponent(panel, txtMemberSurname, 1, 1, gbc);
+        addComponent(panel, new JLabel("E-Posta:"), 0, 2, gbc);
+        addComponent(panel, txtMemberEmail, 1, 2, gbc);
+        addComponent(panel, new JLabel("Şifre:"), 0, 3, gbc);
+        addComponent(panel, txtMemberPass, 1, 3, gbc);
+
+        JButton btnAdd = new JButton("Üye Ekle");
+        btnAdd.addActionListener(e -> {
+            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberEmail.getText(), txtMemberPass.getText()))
+                JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
+        });
+        addComponent(panel, btnAdd, 1, 4, gbc);
+        return panel;
+    }
+
+
+    //KİTAP İŞLEMLERİ
+
+    //kitap ekleme işlemi
+    private JPanel createBookPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Kitap Envanter Yönetimi"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        txtIsbn = new JTextField(15);
+        txtBookName = new JTextField(15);
+        txtBookAuthorName = new JTextField(15);
+        txtBookAuthorSurname = new JTextField(15);
+
+
+        selectCategory = new JComboBox<>();
+        addComponent(panel, new JLabel("ISBN:"), 0, 0, gbc);
+        addComponent(panel, txtIsbn, 1, 0, gbc);
+
+        addComponent(panel, new JLabel("Kitap Adı:"), 0, 1, gbc);
+        addComponent(panel, txtBookName, 1, 1, gbc);
+
+        addComponent(panel, new JLabel("Yazar Adı: "), 0, 2, gbc);
+        addComponent(panel, txtBookAuthorName, 1, 2, gbc);
+
+
+        addComponent(panel, new JLabel("Yazar Soyadı: "), 0, 3, gbc);
+        addComponent(panel, txtBookAuthorSurname, 1, 3, gbc);
+
+        addComponent(panel, new JLabel("Kategori:"), 0, 4, gbc);
+        addComponent(panel, selectCategory, 1, 4, gbc);
+        // Kaydet Butonu
+        JButton btnAddBook = new JButton("Kitabı Kaydet");
+        btnAddBook.addActionListener(e -> {
+            String isbn = txtIsbn.getText().trim();
+            String authorName = txtBookAuthorName.getText().trim();
+            String authorSurname = txtBookAuthorSurname.getText().trim();
+
+            if (bookDAO.isIsbnExists(isbn)) {
+                JOptionPane.showMessageDialog(this,
+                        "Bu ISBN numarasına sahip bir kitap zaten kayıtlı!",
+                        "Mükerrer Kayıt", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
-            // 3. Veritabanı kontrolü (DAO Katmanı)
-            LoginDAO loginDao = new LoginDAO();
-
-            // checkLogin metodunun SQLException fırlatma ihtimaline karşı try-catch gerekebilir
+            authors author = authorDAO.getAuthorByName(authorName, authorSurname);
+            if (author == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Hata: Bu yazar sistemde kayıtlı değil!",
+                        "Yazar Bulunamadı", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            // Kayıt İşlemi
             try {
-                if (loginDao.checkLogin(email, pass)) {
-                    JOptionPane.showMessageDialog(this, "Hoş geldiniz, " + email);
+                books book = new books(
+                        0,
+                        isbn,
+                        txtBookName.getText().trim(),
+                        LocalDate.now(),
+                        author.getId(),
+                        1,
+                        authorName,
+                        authorSurname,
+                        (String) selectCategory.getSelectedItem()
+                );
 
-                    this.dispose(); // Giriş penceresini kapat
+                boolean sonuc = bookDAO.addBook(book);
+                if (sonuc) {
+                    JOptionPane.showMessageDialog(null, "Kitap başarıyla kaydedildi!", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+                    txtIsbn.setText("");
+                    txtBookName.setText("");
+                    txtBookAuthorName.setText("");
+                    txtBookAuthorSurname.setText("");
+                    selectCategory.setSelectedIndex(0);
 
-                    // Ana ekranı başlat (Sınıf isminin LibrarySystemUI olduğundan emin ol)
-                    new LibrarySystemUI().setVisible(true);
+                    txtIsbn.getParent().revalidate();
+                    txtIsbn.getParent().repaint();
 
+                    txtIsbn.requestFocus();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Hatalı Giriş Bilgileri!", "Hata", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Kitap kaydedilemedi. Lütfen veritabanınızı kontrol edin.", "Hata", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Veritabanı bağlantı hatası: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Beklenmeyen bir hata oluştu: " + ex.getMessage(), "Hata", JOptionPane.ERROR_MESSAGE);
             }
         });
-
-        // ÜYE İŞLEMLERİ
-        JPanel pnlMember = new JPanel(new GridLayout(5, 2, 5, 5));
-
-        pnlMember.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Üye İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
-        pnlMember.add(new JLabel(" Adı:"));
-        JTextField txtMemberName = new JTextField();
-        pnlMember.add(txtMemberName);
-
-        pnlMember.add(new JLabel(" Soyadı:"));
-        JTextField txtMemberSurname = new JTextField();
-        pnlMember.add(txtMemberSurname);
-
-        pnlMember.add(new JLabel(" E-Posta:"));
-        JTextField txtMemberEmail = new JTextField();
-        pnlMember.add(txtMemberEmail);
+        addComponent(panel, btnAddBook, 1, 5, gbc);
 
 
-        pnlMember.add(new JLabel(" Şifre:"));
-        JTextField txtMemberPass = new JTextField();
-        pnlMember.add(txtMemberPass);
+        //kitap arama işlemi.
 
-        JButton btnAddMember = new JButton("Üye Ekle");
-        pnlMember.add(btnAddMember);
-
-        JButton btnSearchMember = new JButton("Üye Ara");
-        btnSearchMember.addActionListener(comingSoon);
-
-        pnlMember.add(btnSearchMember);
-        add(pnlMember);
-
-        //Üye ekleme işlemi.
-        btnAddMember.addActionListener(e -> {
-            if (new MemberDAO().addMember(txtMemberName.getText(),txtAuthorSurname.getText(),txtMemberEmail.getText(),txtMemberPass.getText()));
-                JOptionPane.showMessageDialog(this, "Üye eklendi!");
+        JButton btnSearch = new JButton("Kitap Ara");
+        btnSearch.setBackground(new Color(116, 185, 255));
+        btnSearch.addActionListener(e -> {
+            String searchTitle = JOptionPane.showInputDialog(this, "Kitap adı girin:");
+            if (searchTitle != null && !searchTitle.trim().isEmpty()) {
+                books foundBook = bookDAO.getBookByName(searchTitle);
+                if (foundBook != null) {
+                    txtIsbn.setText(foundBook.getIsbn());
+                    txtBookName.setText(foundBook.getBook_name());
+                    txtBookAuthorName.setText(foundBook.getAuthorName());
+                    txtBookAuthorSurname.setText(foundBook.getAuthorSurname());
+                    System.out.println("VERİTABANINDAN GELEN KATEGORİ: " + foundBook.getCategory_name());
+                    if (selectCategory != null) {
+                        selectCategory.setSelectedItem(foundBook.getCategory_name());
+                    }
+                    JOptionPane.showMessageDialog(this, "Kitap bulundu ve kutucuklara dolduruldu.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Kitap bulunamadı!");
+                }
+            }
         });
+        addComponent(panel, btnSearch, 0, 5, gbc);
 
-        // KİTAP İŞLEMLERİ
-
-        JPanel pnlBook = new JPanel(new GridLayout(4, 4, 5, 5));
-        pnlBook.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Kitap İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
-
-
-        pnlBook.add(new JLabel(" ISBN:"));
-        txtIsbn = new JTextField();
-        pnlBook.add(txtIsbn);
-
-        pnlBook.add(new JLabel(" Kitap Adı:"));
-        txtBookName = new JTextField();
-        pnlBook.add(txtBookName);
-
-        pnlBook.add(new JLabel(" Yazar Adı:"));
-        txtAuthorName = new JTextField();
-        pnlBook.add(txtAuthorName);
-
-        pnlBook.add(new JLabel(" Yazar Soyadı:"));
-        txtAuthorSurname = new JTextField();
-        pnlBook.add(txtAuthorSurname);
-
-        String[] categories = {"Roman" , "Bilim Kurgu", "Tarih", "Yazılım" , "Biyografi" , "Otobiyografi"};
-        JComboBox<String>selectCategory = new JComboBox<>(categories);
-
-        pnlBook.add(new JLabel("Kategori Seçiniz: "));
-        pnlBook.add(selectCategory);
-
-        JButton btnAddBook = new JButton("Kitap Ekle");
-        btnAddBook.setBackground(new Color(153, 187, 238));
-        pnlBook.add(btnAddBook);
-
-        JButton btnSearchBook = new JButton("Kitap Ara");
-        pnlBook.add(btnSearchBook);
-        add(pnlBook);
-
-        JPanel pnlDelete = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        pnlBook.add(pnlDelete);
-
-        JButton btnDeleteBook = new JButton("Kitap Sil");
-        btnDeleteBook.setBackground(new Color(153, 187, 238));
-        pnlBook.add(btnDeleteBook);
-
-        //Kitap ekleme işlemi.
-        btnAddBook.addActionListener(e -> {
-            try {
-                String isbn = txtIsbn.getText();
-                String bookName = txtBookName.getText();
-                String authorName = txtAuthorName.getText();
-                String authorSurname = txtAuthorName.getText();
-                String selectedCat = (String) selectCategory.getSelectedItem();
-
-                int catId = 1;
-                if (selectedCat.equals("Roman")) catId = 1;
-                else if (selectedCat.equals("Bilim Kurgu")) catId = 2;
-                else if (selectedCat.equals("Tarih")) catId = 3;
-                else if (selectedCat.equals("Yazılım")) catId = 4;
-                else if (selectedCat.equals("Biyografi")) catId = 5;
-
-                books b = new books(0, txtIsbn.getText(), txtBookName.getText(), LocalDate.now(),1,catId,authorName,authorSurname,selectedCat);
-
-                new BookDAO().addBook(b);
-
-                JOptionPane.showMessageDialog(this, "Kitap eklendi!");
-            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Girişleri kontrol edin!"); }
-        });
-
-        //Kitap Silme İşlemi.
-        btnDeleteBook.addActionListener(e -> {
-            String bookName = txtBookName.getText();
+        //kitap silme işlemi
+        JButton btnDelete = new JButton("Kitap Sil");
+        btnDelete.setBackground(new Color(116, 185, 255));
+        btnDelete.addActionListener(e -> {
+            String bookName = txtBookName.getText().trim();
 
             if (bookName.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lütfen silinecek kitabı önce aratın!");
@@ -184,7 +293,9 @@ public class LibrarySystemUI extends JFrame {
                     "Silme Onayı", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
+                // Kitabı ismine göre çekiyoruz
                 books b = new BookDAO().getBookByName(bookName);
+
                 if (b != null) {
                     boolean success = new BookDAO().deleteBook(b.getId());
                     if (success) {
@@ -193,265 +304,391 @@ public class LibrarySystemUI extends JFrame {
                         txtBookName.setText("");
                         txtAuthorName.setText("");
                     } else {
-                        JOptionPane.showMessageDialog(this, "Kitap silinemedi! (Ödünç verilmiş olabilir)");
+                        JOptionPane.showMessageDialog(this, "Kitap silinemedi! Bu kitap birisine ödünç verilmiş veya bir cezaya konu olmuş olabilir (Foreign Key engellemesi).", "Hata", JOptionPane.ERROR_MESSAGE);
                     }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Silinmek istenen kitap veritabanında bulunamadı! Lütfen aradığınız ismi tam ve doğru yazdığınızdan emin olun.", "Bulunamadı", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
-
-        //ÖDÜNÇ VERME VE İADE
-
-        JPanel pnlLoan = new JPanel(new GridLayout(4, 2, 5, 5));
-        pnlLoan.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Ödünç Verme ve İade", TitledBorder.LEFT, TitledBorder.TOP));
+        addComponent(panel, btnDelete, 2, 5, gbc);
 
 
-        pnlLoan.add(new JLabel(" Üye No: "));
-        txtMemberId = new JTextField();
-        pnlLoan.add(txtMemberId);
+        //kitap düzenleme işlemi
 
-        pnlLoan.add(new JLabel(" Kitap No: "));
-        txtBookId = new JTextField();
-        pnlLoan.add(txtBookId);
-        pnlLoan.add(new JLabel(" İşlem Tipi:"));
+        JButton btnupdateBook = new JButton("Kitap Güncelle");
+        btnupdateBook.setBackground(new Color(116, 185, 255));
+        btnupdateBook.addActionListener(e -> {
+            String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Kitap Adını Girin:");
 
-        pnlLoan.add(new JComboBox<>(new String[]{"Ödünç", "İade"}));
-        btnLoan = new JButton("Kitabı Ödünç Ver");
+            if (searchTitle != null && !searchTitle.trim().isEmpty()) {
+                books exBook = bookDAO.getBookByName(searchTitle.trim());
+                if (exBook != null) {
 
-        btnLoan.setBackground(new Color(153, 187, 238));
-        pnlLoan.add(btnLoan);
+                    JTextField txtIsbnEdit = new JTextField(exBook.getIsbn());
+                    JTextField txtNameEdit = new JTextField(exBook.getBook_name());
+                    JTextField txtAuthNameEdit = new JTextField(exBook.getAuthorName());
+                    JTextField txtAuthSurnameEdit = new JTextField(exBook.getAuthorSurname());
+                    JComboBox<String> comboCatEdit = new JComboBox<>();
+                    comboCatEdit.setSelectedItem(exBook.getCategory_name());
 
-        JButton btnReturnLoan = new JButton("İade Al");
-        btnReturnLoan.addActionListener(comingSoon);
+                    Object[] message = {
+                            "ISBN:", txtIsbnEdit,
+                            "Kitap Adı:", txtNameEdit,
+                            "Yazar Adı:", txtAuthNameEdit,
+                            "Yazar Soyadı:", txtAuthSurnameEdit,
+                            "Kategori:", comboCatEdit
+                    };
 
-        pnlLoan.add(btnReturnLoan);
-        add(pnlLoan);
+                    int option = JOptionPane.showConfirmDialog(this, message, "Kitap Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
+                    if (option == JOptionPane.OK_OPTION) {
+                        try {
+                            authors newAuthor = authorDAO.getAuthorByName(txtAuthNameEdit.getText().trim(), txtAuthSurnameEdit.getText().trim());
+
+                            if (newAuthor == null) {
+                                JOptionPane.showMessageDialog(this, "Hata: Girdiğiniz yazar sistemde kayıtlı değil! Önce yazarı ekleyin.");
+                                return;
+                            }
+                            boolean success = bookDAO.updateBook(
+                                    exBook.getId(),
+                                    txtIsbnEdit.getText(),
+                                    txtNameEdit.getText(),
+                                    newAuthor.getId(),
+                                    1
+                            );
+
+                            if (success) {
+                                JOptionPane.showMessageDialog(this, "Kitap başarıyla güncellendi!");
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Kitap bulunamadı!");
+                }
+            }
+        });
+        addComponent(panel, btnupdateBook, 3, 5, gbc);
+        return panel;
+    }
+
+    private JPanel createCategoryPanel(){
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Kategori Yönetimi"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
 
+        txtCatNameIn = new JTextField(15);
+        txtCategoryDescrption = new JTextField(15);
 
-        // KATEGORİ YÖNETİMİ
+        addComponent(panel, new JLabel("Kategori Adı:"), 0, 0, gbc);
+        addComponent(panel, txtCatNameIn, 1, 0, gbc);
 
-        JPanel pnlCategory = new JPanel(new GridLayout(4, 2, 5, 5));
-        pnlCategory.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Kategori Yönetimi", TitledBorder.LEFT, TitledBorder.TOP));
+        addComponent(panel, new JLabel("Kategori Açıklaması:"), 0, 1, gbc);
+        addComponent(panel, txtCategoryDescrption, 1, 1, gbc);
 
+        //kategori ekleme
 
-        pnlCategory.add(new JLabel(" Kategori Adı:"));
-        JTextField txtCatNameIn = new JTextField();
-        pnlCategory.add(txtCatNameIn);
+        JButton btnAddCategory = new JButton("Kategoriyi Kaydet");
+        btnAddCategory.addActionListener(e -> {
+            try {
+                String category_name = txtCatNameIn.getText();
+                String category_description = txtCategoryDescrption.getText();
 
-        pnlCategory.add(new JLabel(" Açıklama:"));
-        JTextField txtCatDescIn = new JTextField();
-        pnlCategory.add(txtCatDescIn);
-        pnlCategory.add(new JLabel("")); pnlCategory.add(new JLabel(""));
+                if (categoryDAO.addCategory(category_name , category_description)) {
+                    JOptionPane.showMessageDialog(this, "Kategori başarıyla kaydedildi.");
+                    txtCatNameIn.setText("");
+                    txtCategoryDescrption.setText("");
 
-        JButton btnAddCat = new JButton("Kategori Ekle");
-        btnAddCat.setBackground(new Color(153, 204, 153));
-        pnlCategory.add(btnAddCat);
+                    if (selectCategory != null) {
+                        selectCategory.addItem(category_name);
+                    }
 
-        JButton btnEditCat = new JButton("Kategori Düzenle");
-        pnlCategory.add(btnEditCat);
-        add(pnlCategory);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Kategori kaydedilemedi!", "Hata", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Hata oluştu: " + ex.getMessage());
+            }
 
-        //Kategori Ekleme
-        btnAddCat.addActionListener(e -> {
-            if (new CategoryDAO().addCategory(txtCatNameIn.getText(), txtCatDescIn.getText()))
-                JOptionPane.showMessageDialog(this, "Kategori eklendi!");
         });
 
+        addComponent(panel, btnAddCategory, 1, 2, gbc);
 
+        //kategori arama
+        JButton btnSearchCategory = new JButton("Kategori Ara");
+        btnSearchCategory.setBackground(new Color(116, 185, 255));
+        btnSearchCategory.addActionListener(e -> {
+            String searchTitle = JOptionPane.showInputDialog(this, "Kategori adı girin:");
 
-        // YAZAR İŞLEMLERİ
-
-        JPanel pnlAuthor = new JPanel(new GridLayout(3, 4, 5, 5));
-        pnlAuthor.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Yazar İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
-
-
-        pnlAuthor.add(new JLabel(" Yazar Adı: "));
-        JTextField txtAuthorName = new JTextField();
-        pnlAuthor.add(txtAuthorName);
-
-        pnlAuthor.add(new JLabel(" Yazar Soyadı: "));
-        JTextField txtAuthorSurname = new JTextField();
-        pnlAuthor.add(txtAuthorSurname);
-
-        pnlAuthor.add(new JLabel(" Biyografi: "));
-        JTextField txtAuthorBiography = new JTextField();
-        pnlAuthor.add(txtAuthorBiography);
-
-        JButton btnAddAuthor= new JButton("Yazar Ekle");
-        btnAddAuthor.setBackground(new Color(153, 204, 153));
-        pnlAuthor.add(btnAddAuthor);
-
-        JButton btnEditAuthor = new JButton("Yazar Düzenle");
-        pnlAuthor.add(btnEditAuthor);
-        add(pnlAuthor);
-
-        JButton btnSearchAuthor = new JButton("Yazar Ara");
-        pnlAuthor.add(btnSearchAuthor);
-        add(pnlAuthor);
-
-        JButton btnDeleteAuthor = new JButton("Yazar Sil");
-        pnlAuthor.add(btnDeleteAuthor);
-        add(pnlAuthor);
-
-
-        //Yazar ekleme.
-        btnAddAuthor.addActionListener(e -> {
-            if (new AuthorDAO().addAuthor(txtAuthorName.getText(), txtAuthorSurname.getText(), txtAuthorBiography.getText()))
-                JOptionPane.showMessageDialog(this, "Yazar eklendi!");
-        });
-
-        //Yazar arama.
-        btnSearchAuthor.addActionListener(e -> {
-            String NameIn = JOptionPane.showInputDialog(this, "Aranacak Yazar Adını Girin:");
-
-            if (NameIn != null && !NameIn.trim().isEmpty()) {
+            if (searchTitle != null && !searchTitle.trim().isEmpty()) {
                 try {
-
-                    String[] parts = NameIn.trim().split(" ");
+                    String[] parts = searchTitle.trim().split(" ");
 
                     String name = parts[0];
-                    String surname = parts.length > 1 ? parts[1] : "";
+                    String surname = parts.length > 1 ? parts[1] : " ";
 
-                    authors author = new AuthorDAO().getAuthorByName(name, surname);
+                    categories c = new CategoryDAO().getCategoryByName(name);
 
-                    if (author != null) {
-                        txtAuthorName.setText(author.getAuthor_name());
-                        txtAuthorSurname.setText(author.getAuthor_surname());
-                        txtAuthorBiography.setText(author.getBiography());
+                    if (c != null) {
+                        JOptionPane.showMessageDialog(this, "Kategori bulundu ve kutucuklara dolduruldu.");
+                       txtCatNameIn.setText(c.getCategory_name());
+                       txtCategoryDescrption.setText(c.getDescription());
+
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Kategori bulunamadı!");
+                    }
+                }
+                catch (Exception ex){
+                    JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+
+                }
+            }
+        });
+        addComponent(panel, btnSearchCategory, 0, 2, gbc);
+
+        //kategori silme.
+
+        JButton btndeleteCategory = new JButton("Kategori Sil");
+        btndeleteCategory.setBackground(new Color(116, 185, 255));
+        btndeleteCategory.addActionListener(e -> {
+            String categoryName = txtCatNameIn.getText().trim();
+            if (categoryName.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Lütfen silinecek kategoriyi önce aratın!");
+                return;
+            }
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    categoryName + " isimli kategoriyi silmek istediğinize emin misiniz?",
+                    "Silme Onayı", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                categories c = new CategoryDAO().getCategoryByName(categoryName);
+                if (c != null) {
+                    boolean success = new CategoryDAO().deleteCategory(c.getId());
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Kategori başarıyla silindi!");
+                        txtCatNameIn.setText("");
+                        txtCategoryDescrption.setText("");
+
+                        if (selectCategory != null) {
+                            selectCategory.removeItem(categoryName);
+                        }
+                    }
+
+                    else {
+                        JOptionPane.showMessageDialog(this,
+                                "Kategori silinemedi!\nBunun sebebi sistemde hala bu kategoriye kaydedilmiş kitap(lar) olmasıdır.\nLütfen önce bu kategorideki kitapları silin veya kategorilerini başka bir şeyle değiştirin.",
+                                "İşlem Engellendi", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Silinmek istenen kategori veritabanında bulunamadı! Lütfen aradığınız ismi tam ve doğru yazdığınızdan emin olun.", "Bulunamadı", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        addComponent(panel, btndeleteCategory, 2, 2, gbc);
+
+        //kategori düzenleme
+        JButton btnupdateCategory = new JButton("Kategori Güncelle");
+        btnupdateCategory.setBackground(new Color(116, 185, 255));
+        btnupdateCategory.addActionListener(e -> {
+            String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Kategorinin Adını Girin:");
+
+            if (searchTitle != null && !searchTitle.trim().isEmpty()) {
+                categories exCategory = new CategoryDAO().getCategoryByName(searchTitle);
+                if (exCategory != null) {
+
+                    JTextField txtCategory_name = new JTextField(exCategory.getCategory_name());
+                    JTextField txtDescription = new JTextField(exCategory.getDescription());
+
+                    Object[] message = {
+                            "Kategori Adı:",txtCategory_name,
+                            "Açıklama :" , txtDescription
+                    };
+
+                    int option = JOptionPane.showConfirmDialog(this, message, "Kategori Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
+                    if (option == JOptionPane.OK_OPTION) {
+                        try {
+
+                            boolean success = new CategoryDAO().updateCategory(
+
+                                    exCategory.getId(),
+                                    txtCategory_name.getText(),
+                                    txtDescription.getText()
+                            );
+
+                            if (success) {
+                                JOptionPane.showMessageDialog(this, "Kategori başarıyla güncellendi!");
+
+                                if (selectCategory != null) {
+                                    selectCategory.removeItem(searchTitle);
+                                    selectCategory.addItem(txtCategory_name.getText().trim());
+                                }
+
+                                } else {
+                                JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Kategori bulunamadı!");
+                }
+            }
+        });
+        addComponent(panel, btnupdateCategory, 3, 2, gbc);
+        return panel;
+
+
+    }
+
+    private JPanel createLoanPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50));
+        panel.setBorder(BorderFactory.createTitledBorder("Ödünç Verme & İade İşlemleri"));
+        txtMemberId = new JTextField(10);
+        txtBookId = new JTextField(10);
+        JButton btnAction = new JButton("İşlemi Tamamla");
+        panel.add(new JLabel("Üye ID:"));
+        panel.add(txtMemberId);
+        panel.add(new JLabel("Kitap ID:"));
+        panel.add(txtBookId);
+        panel.add(btnAction);
+        btnAction.addActionListener(e -> {
+            try {
+                if (loanDAO.issueLoan(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText())))
+                    JOptionPane.showMessageDialog(this, "İşlem Başarılı!");
+            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Lütfen geçerli ID giriniz!"); }
+        });
+        return panel;
+    }
+
+    //YAZAR İŞLEMLERİ
+
+    //yazar ekleme işlemi
+    private JPanel createAuthorPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Yazar İşlemleri"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        txtAuthorName = new JTextField(15);
+        txtAuthorSurname = new JTextField(15);
+        txtBiography = new JTextField(15);
+
+        addComponent(panel, new JLabel("Yazar Adı:"), 0, 0, gbc);
+        addComponent(panel, txtAuthorName, 1, 0, gbc);
+        addComponent(panel, new JLabel("Yazar Soyadı: "), 0, 1, gbc);
+        addComponent(panel, txtAuthorSurname, 1, 1, gbc);
+        addComponent(panel, new JLabel("Biyografi:"), 0, 2, gbc);
+        addComponent(panel, txtBiography, 1, 2, gbc);
+
+        JButton btnAddAuthor = new JButton("Yazarı Kaydet");
+        btnAddAuthor.addActionListener(e -> {
+            try {
+                String name = txtAuthorName.getText();
+                String surname = txtAuthorSurname.getText();
+                String biography = txtBiography.getText();
+
+                if (authorDAO.addAuthor(name, surname, biography)) {
+                    JOptionPane.showMessageDialog(this, "Yazar başarıyla kaydedildi.");
+                    txtAuthorName.setText("");
+                    txtAuthorSurname.setText("");
+                    txtBiography.setText("");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Yazar kaydedilemedi!", "Hata", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Hata oluştu: " + ex.getMessage());
+            }
+        });
+        addComponent(panel, btnAddAuthor, 1, 3, gbc);
+
+        //Yazar arama işlemi.
+
+        JButton btnSearchAuthor = new JButton("Yazar Ara");
+        btnSearchAuthor.setBackground(new Color(116, 185, 255));
+        btnSearchAuthor.addActionListener(e -> {
+            String searchTitle = JOptionPane.showInputDialog(this, "Yazar adı girin:");
+
+            if (searchTitle != null && !searchTitle.trim().isEmpty()) {
+                try {
+                    String[] parts = searchTitle.trim().split(" ");
+
+                    String name = parts[0];
+                    String surname = parts.length > 1 ? parts[1] : " ";
+
+                    authors a = new AuthorDAO().getAuthorByName(name, surname);
+
+                    if (a != null) {
                         JOptionPane.showMessageDialog(this, "Yazar bulundu ve kutucuklara dolduruldu.");
+                        txtAuthorName.setText(a.getAuthor_name());
+                        txtAuthorSurname.setText(a.getAuthor_surname());
+                        txtBiography.setText(a.getBiography());
                     } else {
                         JOptionPane.showMessageDialog(this, "Yazar bulunamadı!");
                     }
-
-                } catch (Exception ex) {
+                }
+                catch (Exception ex){
                     JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+
                 }
             }
         });
+        addComponent(panel, btnSearchAuthor, 0, 3, gbc);
 
-        //Yazar silme.
-        btnDeleteAuthor.addActionListener(e -> {
-            String fullName = txtAuthorName.getText().trim() + " " + txtAuthorSurname.getText().trim();
+        //Yazar silme işlemi.
 
-            if (fullName.isEmpty()) {
+        JButton btnDeleteAuthor = new JButton("Yazar Sil");
+        btnDeleteAuthor.setBackground(new Color(116,185,255));
+
+        btnDeleteAuthor.addActionListener(e ->{
+
+            String name = txtAuthorName.getText().trim();
+            String surname = txtAuthorSurname.getText().trim();
+
+            if (name.isEmpty() || surname.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lütfen silinecek yazarı önce aratın!");
                 return;
             }
 
+            String fullname = name + " " + surname;
             int confirm = JOptionPane.showConfirmDialog(this,
-                    fullName + " isimli yazarı silmek istediğinize emin misiniz?",
+                    fullname + " isimli yazarı silmek istediğinize emin misiniz?",
                     "Silme Onayı", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                authors author = new AuthorDAO().getAuthorByName(txtAuthorName.getText(), txtAuthorSurname.getText());
-                if (author != null) {
-                    boolean success = new AuthorDAO().DeleteAuthor(author.getAuthor_name());
+                authors a = new AuthorDAO().getAuthorByName(txtAuthorName.getText(), txtAuthorSurname.getText());
+                if (a != null) {
+                    boolean success = new AuthorDAO().DeleteAuthor(a.getAuthor_name());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Yazar başarıyla silindi!");
                         txtAuthorName.setText("");
                         txtAuthorSurname.setText("");
-                        txtAuthorBiography.setText("");
+                        txtBiography.setText("");
                     } else {
-                        JOptionPane.showMessageDialog(this, "Kitap silinemedi! (Ödünç verilmiş olabilir)");
+                        JOptionPane.showMessageDialog(this, "Yazar silinemedi!");
                     }
                 }
             }
-        });
-        // YAZAR DÜZENLE
-        btnEditAuthor.addActionListener(e -> {
-            String NameIn = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar Adı:");
-            if (NameIn != null && !NameIn.isEmpty()) {
-                try {
-                    AuthorDAO dao = new AuthorDAO();
-                    authors exAut = dao.getAuthorByName(txtAuthorName.getText() , txtAuthorSurname.getText());
-                    if (exAut != null) {
-                        JTextField fN = new JTextField(exAut.getAuthor_name());
-                        JTextField fS = new JTextField(exAut.getAuthor_surname());
-                        JTextField fB = new JTextField(exAut.getBiography());
-                        Object[] msg = {"Ad:", fN, "Soyad:", fS, "Bio:", fB};
-                        if (JOptionPane.showConfirmDialog(this, msg, "Yazar Güncelle", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                            if (dao.updateAuthor(exAut.getId(), fN.getText(), fS.getText(), fB.getText()))
-                                JOptionPane.showMessageDialog(this, "Güncellendi!");
-                        }
-                    } else { JOptionPane.showMessageDialog(this, "Bulunamadı!"); }
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Hata!"); }
-            }
-        });
+        } );
+        addComponent(panel, btnDeleteAuthor, 2, 3, gbc);
+        return panel;
+    }
 
-        // CEZA, RAPOR, ÇIKIŞ
+    private void addComponent(JPanel p, Component c, int x, int y, GridBagConstraints gbc) {
+        gbc.gridx = x; gbc.gridy = y;
+        p.add(c, gbc);
+    }
 
-        JPanel pnlFine = new JPanel(new FlowLayout());
-        pnlFine.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Ceza İşlemleri", TitledBorder.LEFT, TitledBorder.TOP));
-        JButton btnCheckFine = new JButton("Ceza Hesapla");
-        pnlFine.add(btnCheckFine);
-        add(pnlFine);
-
-        JPanel pnlReports = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        pnlReports.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Raporlar", TitledBorder.LEFT, TitledBorder.TOP));
-        JButton btnLoanRep = new JButton("Ödünç Raporu"); btnLoanRep.addActionListener(comingSoon);
-        JButton btnStockRep = new JButton("Stok Raporu"); btnStockRep.addActionListener(comingSoon);
-        pnlReports.add(btnLoanRep); pnlReports.add(btnStockRep);
-        add(pnlReports);
-
-        JPanel pnlFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnExit = new JButton("ÇIKIŞ"); btnExit.setBackground(new Color(211, 47, 47));
-        pnlFooter.add(btnExit); add(pnlFooter);
-
-        // ================= ACTION LISTENERS (ETKİLEŞİMLER) =================
-
-        // KİTAP ARA
-        btnSearchBook.addActionListener(e -> {
-            String NameIn = JOptionPane.showInputDialog(this, "Aranacak Kitap Adını Girin:");
-            if (NameIn != null && !NameIn.isEmpty()) {
-                try {
-                    books book = new BookDAO().getBookByName(NameIn);
-                    if (book != null) {
-                        txtIsbn.setText(book.getIsbn());
-                        txtBookName.setText(book.getBook_name());
-                        JOptionPane.showMessageDialog(this, "Kitap bulundu ve kutucuklara dolduruldu.");
-                    } else { JOptionPane.showMessageDialog(this, "Kitap bulunamadı!"); }
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Geçersiz Kitap Adı!"); }
-            }
-        });
-
-        // KATEGORİ DÜZENLE
-        btnEditCat.addActionListener(e -> {
-            String idIn = JOptionPane.showInputDialog(this, "Düzenlenecek Kategori ID:");
-            if (idIn != null && !idIn.isEmpty()) {
-                try {
-                    CategoryDAO dao = new CategoryDAO();
-                    categories exCat = dao.getCategoryById(Integer.parseInt(idIn));
-                    if (exCat != null) {
-                        JTextField fN = new JTextField(exCat.getCategory_name());
-                        JTextField fD = new JTextField(exCat.getDescription());
-                        Object[] msg = {"Ad:", fN, "Açıklama:", fD};
-                        if (JOptionPane.showConfirmDialog(this, msg, "Kategori Güncelle", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                            if (dao.updateCategory(exCat.getId(), fN.getText(), fD.getText()))
-                                JOptionPane.showMessageDialog(this, "Güncellendi!");
-                        }
-                    } else { JOptionPane.showMessageDialog(this, "Bulunamadı!"); }
-                } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Hata!"); }
-            }
-        });
-
-
-
-        // DİĞER
-        btnLoan.addActionListener(e -> {
-            try {
-                if (loanDAO.issueLoan(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText())))
-                    JOptionPane.showMessageDialog(this, "Başarılı!");
-                else JOptionPane.showMessageDialog(this, "Hata!");
-            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Sayı girin!"); }
-        });
-
-        btnCheckFine.addActionListener(e -> {
-            String in = JOptionPane.showInputDialog(this, "Ödünç No:");
-            if (in != null) JOptionPane.showMessageDialog(this, "Borç: " + loanDAO.calculateAndGetFine(Integer.parseInt(in)) + " TL");
-        });
-
-        btnExit.addActionListener(e -> System.exit(0));
-
-        setVisible(true);
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) { }
+        SwingUtilities.invokeLater(() -> new LibrarySystemUI("Yönetici").setVisible(true));
     }
 }

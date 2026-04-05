@@ -25,27 +25,34 @@ public class Login extends JFrame {
         btnLogin = new JButton("Giriş Yap");
         add(new JLabel("")); // Boşluk için
         add(btnLogin);
-            btnLogin.addActionListener(e -> {
-                String email = txtUsername.getText();
-                String password = new String(txtPassword.getPassword());
+        btnLogin.addActionListener(e -> {
+            String email = txtUsername.getText();
+            // (Güvenlik kısmında ufak bir düzenleme: getPassword() kullanımı string'e doğru çevrilmelidir)
+            String password = new String(txtPassword.getPassword());
 
-                if (email.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Tüm alanları doldurun!");
-                    return;
-                }
+            if (email.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Tüm alanları doldurun!");
+                return;
+            }
 
-                LoginDAO dao = new LoginDAO();
+            LoginDAO dao = new LoginDAO();
 
-                if (dao.checkLogin(email, password)) {
-                    JOptionPane.showMessageDialog(this, "Giriş Başarılı!");
+            if (dao.checkLogin(email, password)) {
+                JOptionPane.showMessageDialog(this, "Giriş Başarılı!");
 
-                    this.dispose();
-                    new LibrarySystemUI().setVisible(true);
+                // 1- Veritabanına gidip kişinin adını ve soyadını soruyoruz
+                String adSoyad = dao.getUserFullName(email);
 
-                } else {
-                    JOptionPane.showMessageDialog(this, "Hatalı Kullanıcı Adı veya Şifre!", "Hata", JOptionPane.ERROR_MESSAGE);
-                }
-            });
+                this.dispose();
+
+                // 2- Boş kurucu yerine ANA EKRANA ismini parametre olarak gönderdiğimiz yeni kurucuyu çalıştırıyoruz:
+                new LibrarySystemUI(adSoyad).setVisible(true);
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Hatalı Kullanıcı Adı veya Şifre!", "Hata", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
 
         setVisible(true);
     }

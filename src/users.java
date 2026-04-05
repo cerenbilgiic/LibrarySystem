@@ -7,16 +7,16 @@ public abstract class users {
     protected String email;
     protected String password;
     protected String role;
-    protected LocalDate created_date;
+    protected LocalDate created_at;
 
-    public users(int id, String first_name, String last_name, String email, String password, String role, LocalDate created_date) {
+    public users(int id, String first_name, String last_name, String email, String password, String role, LocalDate created_at) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.created_date = created_date;
+        this.created_at = created_at;
     }
     public abstract boolean login();
 
@@ -68,12 +68,12 @@ public abstract class users {
         this.role = role;
     }
 
-    public LocalDate getCreated_date() {
-        return created_date;
+    public LocalDate getCreated_at() {
+        return created_at;
     }
 
-    public void setCreated_date(LocalDate created_date) {
-        this.created_date = created_date;
+    public void setCreated_at(LocalDate created_date) {
+        this.created_at = created_date;
     }
 
     public String getFullName() {
