@@ -24,7 +24,7 @@ public class BookDAO {
         return false;
     }
     public boolean addBook(books book) {
-        String sql = "INSERT INTO books (isbn, name, publish_year,author_id, category_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO books (isbn, name, publish_year,author_id, category_id,stock) VALUES ( ?, ?, ?, ?,?,?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -33,16 +33,10 @@ public class BookDAO {
             pstmt.setString(2, book.getBook_name()); // Java nesnesinden adı alıyoruz
             pstmt.setObject(3, book.getPurchase_date()); // Java nesnesinden tarihi alıyoruz
             pstmt.setInt(4, book.getAuthorId());
-            pstmt.setInt(5, book.getCategoryId());
+            pstmt.setString(5, book.getCategory_name());
+            pstmt.setInt(6,book.getStock());
 
-            int affectedRows = pstmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                System.out.println("Kitap veritabanına başarıyla eklendi!");
-                return true;
-            }
-
-            return affectedRows > 0;
+            return pstmt.executeUpdate() > 0;
 
         } catch (Exception e) {
             System.out.println("Kitap eklenirken hata oluştu!");
@@ -54,12 +48,12 @@ public class BookDAO {
     // 2. Kitap Arama
     public books getBookByName(String bookName) {
         String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
-                "b.author_id, b.category_id, " +
+                "b.author_id, b.category_id, b.stock, " +
                 "a.author_name, a.author_surname, c.category_name " +
                 "FROM books b " +
                 "LEFT JOIN authors a ON b.author_id = a.id " +
                 "LEFT JOIN categories c ON b.category_id = c.id " +
-                "WHERE b.name = ?";
+                "WHERE LOWER(b.name) LIKE LOWER(?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -68,18 +62,22 @@ public class BookDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                return new books(
+                books foundBook = new books(
                         rs.getInt("id"),
                         rs.getString("isbn"),
-                        rs.getString("name"), // Artık başarıyla eşleşiyor
-                        rs.getObject("publish_year", LocalDate.class),
-                        rs.getInt("author_id"), // Artık SELECT'ten geldiği için çökmez
-                        rs.getInt("category_id"), // Artık SELECT'ten geldiği için çökmez
+                        rs.getString("name"),
+                        rs.getDate("publish_year").toLocalDate(),
+                        rs.getInt("author_id"),
+                        rs.getInt("category_id"),
                         rs.getString("author_name"),
                         rs.getString("author_surname"),
-                        rs.getString("category_name")
+                        rs.getInt("stock")
                 );
+
+                foundBook.setCategory_name(rs.getString("category_name"));
+                return foundBook;
             }
+
         } catch (Exception e) {
             System.out.println("Kitap getirme hatası: " + e.getMessage());
             e.printStackTrace();
@@ -109,7 +107,7 @@ public class BookDAO {
     }
 
     //kitap güncelleme
-    public boolean updateBook(int bookId, String isbn, String name, int authorId, int categoryId) {
+    public boolean updateBook(int bookId, String isbn, String name, int authorId, int categoryId, int stock) {
         String sql = "UPDATE books SET isbn = ?, name = ?, author_id = ?, category_id = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -120,6 +118,7 @@ public class BookDAO {
             pstmt.setInt(3, authorId);
             pstmt.setInt(4, categoryId);
             pstmt.setInt(5, bookId);
+            pstmt.setInt(6, stock);
 
             return pstmt.executeUpdate() > 0;
 

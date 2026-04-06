@@ -13,8 +13,8 @@ public class AuthorDAO {
         String sql = "INSERT INTO authors (author_name, author_surname, biography) VALUES (?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, authorName);
-            pstmt.setString(2, authorSurname);
+            pstmt.setString(1, authorName.toUpperCase());
+            pstmt.setString(2, authorSurname.toUpperCase());
             pstmt.setString(3, biography);
             return pstmt.executeUpdate() > 0;
         } catch (Exception e) {

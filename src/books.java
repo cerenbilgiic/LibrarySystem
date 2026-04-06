@@ -7,11 +7,20 @@ public class books {
     private LocalDate purchaseDate;
     private int authorId;
     private int categoryId;
+    private int stock;
     private String authorName;
     private String authorSurname;
-    private String categoryName;
+    private String category_name;
 
-    public books(int id, String isbn, String bookName, LocalDate purchaseDate,int authorId, int categoryId,String authorName, String authorSurname ,String categoryName) {
+    public String getCategory_name() {
+        return category_name;
+    }
+
+    public void setCategory_name(String category_name) {
+        this.category_name = category_name;
+    }
+
+    public books(int id, String isbn, String bookName, LocalDate purchaseDate,int authorId, int categoryId,String authorName, String authorSurname , int stock) {
         this.id = id;
         this.isbn = isbn;
         this.bookName = bookName;
@@ -20,7 +29,7 @@ public class books {
         this.categoryId=categoryId;
         this.authorName = authorName;
         this.authorSurname=authorSurname;
-        this.categoryName = categoryName;
+        this.stock = stock;
     }
 
     public int getId() { return id; }
@@ -31,5 +40,6 @@ public class books {
     public int getCategoryId(){return categoryId ;}
     public String getAuthorName(){return authorName; }
     public String getAuthorSurname(){return authorSurname; }
-    public String getCategory_name() { return categoryName; }
+    public int getStock() {return stock;}
+    public void setStock(int stock) {this.stock = stock;}
 }

@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class categories {
     private int id;
     private String category_name;
@@ -7,6 +9,25 @@ public class categories {
         this.id = id;
         this.category_name = category_name;
         this.description = description;
+
+
+    }
+    @Override
+    public String toString() {
+        return category_name;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof categories)) return false;
+
+        categories category = (categories) o;
+        return id == category.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public int getId(){return id ;}
@@ -17,4 +38,6 @@ public class categories {
 
     public String getDescription(){return description ;}
     public void setDescription(String description){this.description = description ;}
+
+
 }
