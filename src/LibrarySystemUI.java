@@ -158,6 +158,10 @@ public class LibrarySystemUI extends JFrame {
         btnAdd.addActionListener(e -> {
             if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberUsername.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
+
+            txtMemberName.setText("");
+            txtMemberSurname.setText("");
+            txtMemberUsername.setText("");
         });
         addComponent(panel, btnAdd, 1, 4, gbc);
 
@@ -419,7 +423,7 @@ try {
 
             if (searchTitle == null || searchTitle.trim().isEmpty()) return;
 
-            books foundBook = bookDAO.getBookByName(searchTitle);
+            books foundBook = bookDAO.getBookByIsbn(searchTitle);
 
             if (foundBook != null) {
 
@@ -450,7 +454,7 @@ try {
                 return;
             }
 
-            books b = bookDAO.getBookByName(bookName);
+            book.setIsbn(txtIsbn.getText());
 
             if (b != null) {
 
@@ -482,7 +486,7 @@ try {
             String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Kitap Adını Girin:");
 
             if (searchTitle != null && !searchTitle.trim().isEmpty()) {
-                books exBook = bookDAO.getBookByName(searchTitle.trim());
+                books exBook = bookDAO.getBookByIsbn(searchTitle.trim());
                 if (exBook != null) {
 
                     JTextField txtIsbnEdit = new JTextField(exBook.getIsbn());
@@ -571,17 +575,17 @@ try {
         
         panel.add(new JLabel("Üye Kullanıcı Adı:"));
         panel.add(txtUsername);
-        panel.add(new JLabel("Kitap Adı:"));
-        panel.add(txtBookNameInput);
+        panel.add(new JLabel("Kitap ISBN:"));
+        panel.add(txtIsbn);
         panel.add(btnBorrow);
         panel.add(btnReturn);
         
         btnBorrow.addActionListener(e -> {
             try {
                 String username = txtUsername.getText().trim();
-                String bName = txtBookNameInput.getText().trim();
-                if (username.isEmpty() || bName.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve Kitap Adı giriniz!");
+                String isbn = txtIsbn.getText().trim();
+                if (username.isEmpty() || isbn.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve ISBN giriniz!");
                     return;
                 }
                 
@@ -591,7 +595,7 @@ try {
                     return;
                 }
                 
-                books b = bookDAO.getBookByName(bName);
+                books b = bookDAO.getBookByIsbn(isbn);
                 if (b == null) {
                     JOptionPane.showMessageDialog(this, "Kitap bulunamadı!");
                     return;
@@ -600,7 +604,7 @@ try {
                 if (loanDAO.issueLoan(m.getId(), b.getId())) {
                     JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
                     txtUsername.setText("");
-                    txtBookNameInput.setText("");
+                    txtIsbn.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "İşlem başarısız! Kitap stokta olmayabilir.");
                 }
@@ -610,9 +614,9 @@ try {
         btnReturn.addActionListener(e -> {
             try {
                 String username = txtUsername.getText().trim();
-                String bName = txtBookNameInput.getText().trim();
-                if (username.isEmpty() || bName.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve Kitap Adı giriniz!");
+                String isbn = txtIsbn.getText().trim();
+                if (username.isEmpty() || isbn.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve ISBN giriniz!");
                     return;
                 }
                 
@@ -622,7 +626,7 @@ try {
                     return;
                 }
                 
-                books b = bookDAO.getBookByName(bName);
+                books b = bookDAO.getBookByIsbn(isbn);
                 if (b == null) {
                     JOptionPane.showMessageDialog(this, "Kitap bulunamadı!");
                     return;
@@ -650,7 +654,7 @@ try {
                         if (loanDAO.processReturn(m.getId(), b.getId(), pendingFine)) {
                             JOptionPane.showMessageDialog(this, "İade işlemi ve ceza tahsilatı başarıyla tamamlandı!");
                             txtUsername.setText("");
-                            txtBookNameInput.setText("");
+                            txtIsbn.setText("");
                         } else {
                             JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                         }
@@ -662,7 +666,7 @@ try {
                     if (loanDAO.processReturn(m.getId(), b.getId(), 0.0)) {
                         JOptionPane.showMessageDialog(this, "İade işlemi başarıyla tamamlandı!\nHerhangi bir ceza bulunmuyor.");
                         txtUsername.setText("");
-                        txtBookNameInput.setText("");
+                        txtIsbn.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                     }
@@ -875,10 +879,10 @@ try {
             if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeUsername.getText(), txtEmployeePass.getText()))
                 JOptionPane.showMessageDialog(this, "Çalışan başarıyla eklendi!");
 
-            String employeeName = txtEmployeeName.getText().trim();
-            String employeeSurname = txtEmployeeSurname.getText().trim();
-            String employeeUsername = txtEmployeeUsername.getText().trim();
-            String employeePassword = txtEmployeePass.getText().trim();
+            txtEmployeeName.setText(" ");
+            txtEmployeeSurname.setText("");
+            txtEmployeeUsername.setText("");
+            txtEmployeePass.setText("");
         });
         addComponent(panel, btnAddEmployee, 1, 4, gbc);
 
@@ -963,7 +967,7 @@ try {
                         Object[] message = {
                                 "Adı :", txtEmployeeName,
                                 "Soyadı: ", txtEmployeeSurname,
-                                "K. Adı: ", txtEmployeeUsername,
+                                "Kullanıcı Adı: ", txtEmployeeUsername,
                                 "Şifre: ", txtEmployeePass
                         };
 
