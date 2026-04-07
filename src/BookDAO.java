@@ -106,9 +106,48 @@ public class BookDAO {
         }
     }
 
+    public books getBookByIsbn(String isbn) {
+        String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
+                "b.author_id, b.category_id, b.stock, " +
+                "a.author_name, a.author_surname, c.category_name " +
+                "FROM books b " +
+                "LEFT JOIN authors a ON b.author_id = a.id " +
+                "LEFT JOIN categories c ON b.category_id = c.id " +
+                "WHERE b.isbn = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, isbn.trim());
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                books foundBook = new books(
+                        rs.getInt("id"),
+                        rs.getString("isbn"),
+                        rs.getString("name"),
+                        rs.getDate("publish_year") != null ? rs.getDate("publish_year").toLocalDate() : LocalDate.now(),
+                        rs.getInt("author_id"),
+                        rs.getInt("category_id"),
+                        rs.getString("author_name"),
+                        rs.getString("author_surname"),
+                        rs.getInt("stock")
+                );
+
+                foundBook.setCategory_name(rs.getString("category_name"));
+                return foundBook;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Kitap getirme hatası (ISBN ile): " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     //kitap güncelleme
     public boolean updateBook(int bookId, String isbn, String name, int authorId, int categoryId, int stock) {
-        String sql = "UPDATE books SET isbn = ?, name = ?, author_id = ?, category_id = ? WHERE id = ?";
+        String sql = "UPDATE books SET isbn = ?, name = ?, author_id = ?, category_id = ?, stock = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -117,8 +156,8 @@ public class BookDAO {
             pstmt.setString(2, name);
             pstmt.setInt(3, authorId);
             pstmt.setInt(4, categoryId);
-            pstmt.setInt(5, bookId);
-            pstmt.setInt(6, stock);
+            pstmt.setInt(5, stock);
+            pstmt.setInt(6, bookId);
 
             return pstmt.executeUpdate() > 0;
 
