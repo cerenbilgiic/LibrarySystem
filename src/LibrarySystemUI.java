@@ -191,21 +191,19 @@ public class LibrarySystemUI extends JFrame {
 
         btnDeleteMember.addActionListener(e ->{
 
-            String name = txtMemberName.getText().trim();
-            String surname = txtMemberSurname.getText().trim();
+            String username = txtMemberUsername.getText().trim();
 
-            if (name.isEmpty() || surname.isEmpty()) {
+            if (username.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lütfen silinecek üyeyi önce aratın!");
                 return;
             }
 
-            String fullname = name + " " + surname;
             int confirm = JOptionPane.showConfirmDialog(this,
-                    fullname + " isimli üyeyi silmek istediğinize emin misiniz?",
+                    username + " kullanıcı adlı üyeyi silmek istediğinize emin misiniz?",
                     "Silme Onayı", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                member member = new MemberDAO().getMemberByName(txtMemberName.getText(), txtMemberSurname.getText());
+                member member = new MemberDAO().getMemberByUsername(username);
                 if (member != null) {
                     boolean success = new MemberDAO().DeleteMember(member.getId());
                     if (success) {
@@ -226,15 +224,11 @@ public class LibrarySystemUI extends JFrame {
         JButton btnupdateMember = new JButton("Üye Güncelle");
         btnupdateMember.setBackground(new Color(116, 185, 255));
         btnupdateMember.addActionListener(e -> {
-                        String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Üye Adını Girin:");
+                        String searchUsername = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin Kullanıcı Adını Girin:");
 
-                        if (searchTitle != null && !searchTitle.trim().isEmpty()) {
+                        if (searchUsername != null && !searchUsername.trim().isEmpty()) {
                             try {
-                                String[] parts = searchTitle.trim().split(" ");
-                                String first_name = parts[0];
-                                String last_name = parts.length > 1 ? parts[1] : " ";
-
-                                member exMember = new MemberDAO().getMemberByName(first_name, last_name);
+                                member exMember = new MemberDAO().getMemberByUsername(searchUsername.trim());
 
                                 if (exMember != null) {
                                     JTextField txtMemberName = new JTextField(exMember.getFirst_name());
