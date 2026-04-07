@@ -10,11 +10,12 @@ public class LibrarySystemUI extends JFrame {
     private CardLayout cardLayout;
 
     // Form alanları
-    private JTextField txtMemberName, txtMemberSurname, txtMemberUsername, txtMemberPass;
+    private JTextField txtMemberName, txtMemberSurname, txtMemberUsername;
     private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography;
     private JTextField txtMemberId, txtBookId,txtCategoryId, txtAuthorId, txtCatNameIn , txtStock;
     private JButton btnSearchBook;
     private JComboBox<String> selectCategory;
+    private JTextField txtEmployeeName, txtEmployeeSurname , txtEmployeeUsername, txtEmployeePass,txtEmployeeId;
 
     JTextField txtBookAuthorName;
     JTextField txtBookAuthorSurname;
@@ -25,6 +26,7 @@ public class LibrarySystemUI extends JFrame {
     private BookDAO bookDAO = new BookDAO();
     private AuthorDAO authorDAO = new AuthorDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
+    private EmployeeDAO employeeDAO = new EmployeeDAO();
 
     private String loggedUserName = "";
 
@@ -70,6 +72,7 @@ public class LibrarySystemUI extends JFrame {
         cardPanel.add(createBookPanel(), "pnlBook");
         cardPanel.add(createLoanPanel(), "pnlLoan");
         cardPanel.add(createAuthorPanel(), "pnlAuthor");
+        cardPanel.add(createEmployeePanel(),"pnlEmployee");
 
         // --- 4. SIDEBAR (SOL MENÜ) ---
         JPanel sidebar = new JPanel();
@@ -95,6 +98,8 @@ public class LibrarySystemUI extends JFrame {
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
         sidebar.add(createMenuButton("Yazar İşlemleri", "pnlAuthor"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createMenuButton("Çalışan İşlemleri" , "pnlEmployee"));
+        sidebar.add(Box.createRigidArea(new Dimension(0,10)));
 
         sidebar.add(Box.createVerticalGlue());
 
@@ -139,21 +144,19 @@ public class LibrarySystemUI extends JFrame {
         txtMemberName = new JTextField(15);
         txtMemberSurname = new JTextField(15);
         txtMemberUsername = new JTextField(15);
-        txtMemberPass = new JTextField(15);
 
         addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
         addComponent(panel, txtMemberName, 1, 0, gbc);
         addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
         addComponent(panel, txtMemberSurname, 1, 1, gbc);
-        addComponent(panel, new JLabel("E-Posta:"), 0, 2, gbc);
+        addComponent(panel, new JLabel("Kullanıcı Adı:"), 0, 2, gbc);
         addComponent(panel, txtMemberUsername, 1, 2, gbc);
-        addComponent(panel, new JLabel("Şifre:"), 0, 3, gbc);
-        addComponent(panel, txtMemberPass, 1, 3, gbc);
+
 
         JButton btnAdd = new JButton("Üye Ekle");
         btnAdd.setBackground(new Color(116, 185, 255));
         btnAdd.addActionListener(e -> {
-            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberUsername.getText(), txtMemberPass.getText()))
+            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberUsername.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
         });
         addComponent(panel, btnAdd, 1, 4, gbc);
@@ -163,7 +166,7 @@ public class LibrarySystemUI extends JFrame {
         JButton btnSearchMember = new JButton("Üye Ara");
         btnSearchMember.setBackground(new Color(116, 185, 255));
         btnSearchMember.addActionListener(e -> {
-            String searchUsername = JOptionPane.showInputDialog(this, "Üyenin Kullanıcı Adını Giriniz:"); 
+            String searchUsername = JOptionPane.showInputDialog(this, "Üyenin Kullanıcı Adını Giriniz:");
             if (searchUsername != null && !searchUsername.trim().isEmpty()) {
                 try {
                     member member = new MemberDAO().getMemberByUsername(searchUsername.trim());
@@ -172,7 +175,6 @@ public class LibrarySystemUI extends JFrame {
                         txtMemberName.setText(member.getFirst_name());
                         txtMemberSurname.setText(member.getLast_name());
                         txtMemberUsername.setText(member.getUsername());
-                        txtMemberPass.setText(member.getPassword());
                     } else {
                         JOptionPane.showMessageDialog(this, "Böyle bir üye kaydı bulunamadı!");
                     }
@@ -211,7 +213,6 @@ public class LibrarySystemUI extends JFrame {
                         txtMemberName.setText("");
                         txtMemberSurname.setText("");
                         txtMemberUsername.setText("");
-                        txtMemberPass.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "Üye silinemedi!");
                     }
@@ -224,58 +225,47 @@ public class LibrarySystemUI extends JFrame {
         JButton btnupdateMember = new JButton("Üye Güncelle");
         btnupdateMember.setBackground(new Color(116, 185, 255));
         btnupdateMember.addActionListener(e -> {
-                        String searchUsername = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin Kullanıcı Adını Girin:");
+        String searchUsername = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin Kullanıcı Adını Girin:");
 
-                        if (searchUsername != null && !searchUsername.trim().isEmpty()) {
-                            try {
-                                member exMember = new MemberDAO().getMemberByUsername(searchUsername.trim());
+        if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+        try {
+        member exMember = new MemberDAO().getMemberByUsername(searchUsername.trim());
+        if (exMember != null) {
+        JTextField txtMemberName = new JTextField(exMember.getFirst_name());
+        JTextField txtMemberSurname = new JTextField(exMember.getLast_name());
+        JTextField txtMemberUsername = new JTextField(exMember.getUsername());
+        Object[] message = {
+        "Adı :", txtMemberName,
+        "Soyadı: ", txtMemberSurname,
+        "Kullanıcı. Adı: ", txtMemberUsername,
+        };
+        int option = JOptionPane.showConfirmDialog(this, message, "Üye Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+try {
+    boolean success = new MemberDAO().updateMember(
+    exMember.getId(),
+    txtMemberName.getText(),
+    txtMemberSurname.getText(),
+    txtMemberUsername.getText()
+    );
 
-                                if (exMember != null) {
-                                    JTextField txtMemberName = new JTextField(exMember.getFirst_name());
-                                    JTextField txtMemberSurname = new JTextField(exMember.getLast_name());
-                                    JTextField txtMemberUsername = new JTextField(exMember.getUsername());
-                                    JTextField txtMemberPassword = new JTextField(exMember.getPassword());
+    if (success) {
+    JOptionPane.showMessageDialog(this, "Üye başarıyla güncellendi!");
+   } else {
+   JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
+   }
+    } catch (Exception ex) {
+    JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());}
+    }
+    } else {
+    JOptionPane.showMessageDialog(this, "Üye bulunamadı!");}
+    } catch (Exception ex) {
+    JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());}
+    }
+    });
+    addComponent(panel, btnupdateMember, 1, 6, gbc);
 
-                                    Object[] message = {
-                                            "Adı :", txtMemberName,
-                                            "Soyadı: ", txtMemberSurname,
-                                            "K. Adı: ", txtMemberUsername,
-                                            "Şifre: ", txtMemberPassword
-                                    };
-
-                                    int option = JOptionPane.showConfirmDialog(this, message, "Üye Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
-                                    if (option == JOptionPane.OK_OPTION) {
-                                        try {
-                                            boolean success = new MemberDAO().updateMember(
-                                                    exMember.getId(),
-                                                    txtMemberName.getText(),
-                                                    txtMemberSurname.getText(),
-                                                    txtMemberUsername.getText(),
-                                                    txtMemberPassword.getText()
-                                            );
-
-                                            if (success) {
-                                                JOptionPane.showMessageDialog(this, "Üye başarıyla güncellendi!");
-                                            } else {
-                                                JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
-                                            }
-                                        } catch (Exception ex) {
-                                            JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());
-                                        }
-                                    }
-                                } else {
-                                    JOptionPane.showMessageDialog(this, "Üye bulunamadı!");
-                                }
-                            } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
-                            }
-                        }
-                    });
-                    addComponent(panel, btnupdateMember, 1, 6, gbc);
-
-                    return panel;
-
-
+    return panel;
     }
 
     //KİTAP İŞLEMLERİ
@@ -853,6 +843,160 @@ public class LibrarySystemUI extends JFrame {
         addComponent(panel, btnupdateAuthor, 1, 4, gbc);
         return panel;
     }
+
+    //ÇALIŞAN İŞLEMLERİ
+
+    //çalışan ekleme işlemi.
+
+    private JPanel createEmployeePanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Çalışan Yönetim Sistemi"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+       txtEmployeeName = new JTextField(15);
+        txtEmployeeSurname = new JTextField(15);
+        txtEmployeeUsername = new JTextField(15);
+        txtEmployeePass = new JTextField(15);
+
+        addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
+        addComponent(panel, txtEmployeeName, 1, 0, gbc);
+        addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
+        addComponent(panel, txtEmployeeSurname, 1, 1, gbc);
+        addComponent(panel, new JLabel("Kullanıcı Adı:"), 0, 2, gbc);
+        addComponent(panel, txtEmployeeUsername, 1, 2, gbc);
+        addComponent(panel, new JLabel("Şifre:"), 0, 3, gbc);
+        addComponent(panel, txtEmployeePass, 1, 3, gbc);
+
+        JButton btnAddEmployee = new JButton("Çalışan Ekle");
+        btnAddEmployee.setBackground(new Color(116, 185, 255));
+        btnAddEmployee.addActionListener(e -> {
+            if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeUsername.getText(), txtEmployeePass.getText()))
+                JOptionPane.showMessageDialog(this, "Çalışan başarıyla eklendi!");
+        });
+        addComponent(panel, btnAddEmployee, 1, 4, gbc);
+
+        //Çalışan arama işlemi.
+
+        JButton btnSearchEmployee = new JButton("Çalışan Ara");
+        btnSearchEmployee.setBackground(new Color(116, 185, 255));
+        btnSearchEmployee.addActionListener(e -> {
+            String searchUsername = JOptionPane.showInputDialog(this, "Çalışanın Kullanıcı Adını Giriniz:");
+            if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+                try {
+                    employees employees = new EmployeeDAO().getEmployeeByUsername(searchUsername.trim());
+                    if (employees != null) {
+                        JOptionPane.showMessageDialog(this, "Çalışan bulundu ve kutucuklara dolduruldu.");
+                        txtEmployeeName.setText(employees.getFirst_name());
+                        txtEmployeeSurname.setText(employees.getLast_name());
+                        txtEmployeeUsername.setText(employees.getUsername());
+                        txtEmployeePass.setText(employees.getPassword());
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Böyle bir çalışan kaydı bulunamadı!");
+                    }
+                }
+                catch (Exception ex){
+                    JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+                }
+            }
+        });
+        addComponent(panel, btnSearchEmployee, 0, 4, gbc);
+
+        //Çalışan silme işlemi.
+
+        JButton btnDeleteEmployee = new JButton("Çalışanı Sil");
+        btnDeleteEmployee.setBackground(new Color(116,185,255));
+
+        btnDeleteEmployee.addActionListener(e ->{
+
+            String username = txtEmployeeUsername.getText().trim();
+
+            if (username.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Lütfen silinecek çalışanı önce aratın!");
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    username + " kullanıcı adlı çalışanı silmek istediğinize emin misiniz?",
+                    "Silme Onayı", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                employees employees = new EmployeeDAO().getEmployeeByUsername(username);
+                if (employees != null) {
+                    boolean success = new EmployeeDAO().DeleteEmployee(employees.getId());
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Çalışan başarıyla silindi!");
+                      txtEmployeeName.setText("");
+                        txtEmployeeSurname.setText("");
+                        txtEmployeeUsername.setText("");
+                        txtEmployeePass.setText("");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Çalışan silinemedi!");
+                    }
+                }
+            }
+        } );
+        addComponent(panel, btnDeleteEmployee, 2, 4, gbc);
+        //çalışan düzenleme işlemi
+
+        JButton btnupdateEmployee = new JButton("Çalışan Güncelle");
+        btnupdateEmployee.setBackground(new Color(116, 185, 255));
+        btnupdateEmployee.addActionListener(e -> {
+            String searchUsername = JOptionPane.showInputDialog(this, "Düzenlenecek Çalışanın Kullanıcı Adını Girin:");
+
+            if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+                try {
+                    employees exEmployee = new EmployeeDAO().getEmployeeByUsername(searchUsername.trim());
+
+                    if (exEmployee != null) {
+                        JTextField txtEmployeeName = new JTextField(exEmployee.getFirst_name());
+                        JTextField txtEmployeeSurname = new JTextField(exEmployee.getLast_name());
+                        JTextField txtEmployeeUsername = new JTextField(exEmployee.getUsername());
+                        JTextField txtEmployeePassword = new JTextField(exEmployee.getPassword());
+
+                        Object[] message = {
+                                "Adı :", txtEmployeeName,
+                                "Soyadı: ", txtEmployeeSurname,
+                                "K. Adı: ", txtEmployeeUsername,
+                                "Şifre: ", txtEmployeePass
+                        };
+
+                        int option = JOptionPane.showConfirmDialog(this, message, "Çalışan Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
+                        if (option == JOptionPane.OK_OPTION) {
+                            try {
+                                boolean success = new EmployeeDAO().updateEmployee(
+                                        exEmployee.getId(),
+                                        txtEmployeeName.getText(),
+                                        txtEmployeeSurname.getText(),
+                                        txtEmployeeUsername.getText(),
+                                        txtEmployeePassword.getText()
+                                );
+
+                                if (success) {
+                                    JOptionPane.showMessageDialog(this, "Çalışan başarıyla güncellendi!");
+                                } else {
+                                    JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
+                                }
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Çalışan bulunamadı!");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+                }
+            }
+        });
+        addComponent(panel, btnupdateEmployee, 1, 6, gbc);
+
+        return panel;
+
+
+    }
+
 
     private void addComponent(JPanel p, Component c, int x, int y, GridBagConstraints gbc) {
         gbc.gridx = x; gbc.gridy = y;

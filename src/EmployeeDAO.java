@@ -3,10 +3,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemberDAO {
-    // ÜYE EKLE
-    public boolean addMember(String first_name , String last_name ,String username ) {
-        String sql = "INSERT INTO users (first_name , last_name , username) VALUES (?, ?, ?)";
+public class EmployeeDAO {
+    // ÇALIŞAN EKLEME
+    public boolean addEmployee(String first_name , String last_name ,String username ,String password) {
+        String sql = "INSERT INTO users (first_name , last_name , username , password) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -14,6 +14,7 @@ public class MemberDAO {
             pstmt.setString(1, first_name);
             pstmt.setString(2, last_name);
             pstmt.setString(3, username);
+            pstmt.setString(4, password);
             return pstmt.executeUpdate() > 0;
 
         } catch (Exception e) {
@@ -22,8 +23,8 @@ public class MemberDAO {
         }
     }
 
-    //Üye arama işlemi.
-    public member getMemberByName(String first_name, String last_name) {
+    //Çalışan arama işlemi.
+    public employees getEmployeeByName(String first_name, String last_name) {
         String sql = "SELECT * FROM users " +
                 "WHERE LOWER(first_name) LIKE LOWER(?) " +
                 "AND LOWER(last_name) LIKE LOWER(?)";
@@ -44,20 +45,21 @@ public class MemberDAO {
                 java.sql.Timestamp dbDate = rs.getTimestamp("created_at");
                 LocalDate creationDate = (dbDate != null) ? dbDate.toLocalDateTime().toLocalDate() : LocalDate.now();
 
-                return new member(
+                return new employees(
                         rs.getInt("id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
                         rs.getString("username"),
+                        rs.getString("password"),
                         rs.getString("role"),
-                        creationDate, // <-- Hata çıkartan kısım düzeltildi.
-                        rs.getInt("maxAllowedbooks")
+                        creationDate
+
                 );
             }
 
         } catch (Exception e) {
             // Eğer yine bir hata çıkarsa, program size konsoldan haber versin
-            System.out.println("----- ÜYE ARAMADA BİR HATA ÇIKTI -----");
+            System.out.println("----- ÇALIŞAN ARAMADA BİR HATA ÇIKTI -----");
             e.printStackTrace();
         }
 
@@ -65,8 +67,8 @@ public class MemberDAO {
     }
 
 
-    // username üzerinden üye arama işlemi
-    public member getMemberByUsername(String username) {
+    // username üzerinden çalışan arama işlemi
+    public employees getEmployeeByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -78,18 +80,18 @@ public class MemberDAO {
                 java.sql.Timestamp dbDate = rs.getTimestamp("created_at");
                 LocalDate creationDate = (dbDate != null) ? dbDate.toLocalDateTime().toLocalDate() : LocalDate.now();
 
-                return new member(
+                return new employees(
                         rs.getInt("id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
                         rs.getString("username"),
+                        rs.getString("password"),
                         rs.getString("role"),
-                        creationDate,
-                        rs.getInt("maxAllowedbooks")
+                        creationDate
                 );
             }
         } catch (Exception e) {
-            System.out.println("----- KULLANICI ADI İLE ÜYE ARAMADA HATA -----");
+            System.out.println("----- ÇALIŞAN ARAMADA HATA -----");
             e.printStackTrace();
         }
         return null;
@@ -97,7 +99,7 @@ public class MemberDAO {
 
     //üye silme işlemi.
 
-    public boolean DeleteMember(int id ) {
+    public boolean DeleteEmployee(int id ) {
         String sql = "DELETE FROM users WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -109,15 +111,15 @@ public class MemberDAO {
             return rowsAffected > 0; // Silme başarılıysa true döner
 
         } catch (SQLException e) {
-            System.out.println("Üye silinirken SQL hatası oluştu!");
+            System.out.println("Çalışan silinirken SQL hatası oluştu!");
             e.printStackTrace();
             return false;
         }
     }
 
-    //üye güncelleme
-    public boolean updateMember(int id , String first_name , String last_name , String username ) {
-        String sql = "UPDATE users SET first_name = ?, last_name = ?, username = ?,WHERE id = ?";
+    //çalışan güncelleme
+    public boolean updateEmployee(int id , String first_name , String last_name , String username , String password) {
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, username = ?, password = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -126,7 +128,8 @@ public class MemberDAO {
             pstmt.setString(1, first_name);
             pstmt.setString(2, last_name);
             pstmt.setString(3, username);
-            pstmt.setInt(4,id);
+            pstmt.setString(4,password);
+            pstmt.setInt(5,id);
 
             return pstmt.executeUpdate() > 0;
 
