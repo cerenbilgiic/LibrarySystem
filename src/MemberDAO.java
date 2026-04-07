@@ -31,6 +31,11 @@ public class MemberDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()){
+                String role = rs.getString("role");
+                if (role == null || (!role.equalsIgnoreCase("Kütüphane Üyesi") && !role.equalsIgnoreCase("Üye"))) {
+                    return null; // Yalnızca kütüphane üyeleri gelsin
+                }
+
                 java.sql.Timestamp dbDate = rs.getTimestamp("created_at");
                 LocalDate creationDate = (dbDate != null) ? dbDate.toLocalDateTime().toLocalDate() : LocalDate.now();
 
@@ -73,7 +78,7 @@ public class MemberDAO {
 
     //üye güncelleme
     public boolean updateMember(int id , String first_name , String last_name , String tc ) {
-        String sql = "UPDATE users SET first_name = ?, last_name = ?, tc = ?,WHERE id = ?";
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, tc = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
