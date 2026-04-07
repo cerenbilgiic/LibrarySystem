@@ -67,6 +67,37 @@ public class MemberDAO {
     }
 
 
+    // e-posta üzerinden üye arama işlemi
+    public member getMemberByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, email.trim());
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()){
+                java.sql.Timestamp dbDate = rs.getTimestamp("created_at");
+                LocalDate creationDate = (dbDate != null) ? dbDate.toLocalDateTime().toLocalDate() : LocalDate.now();
+
+                return new member(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email"),
+                        rs.getString("password"),
+                        rs.getString("role"),
+                        creationDate,
+                        rs.getInt("maxAllowedbooks")
+                );
+            }
+        } catch (Exception e) {
+            System.out.println("----- E-POSTA İLE ÜYE ARAMADA HATA -----");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     //üye silme işlemi.
 
     public boolean DeleteMember(int id ) {
