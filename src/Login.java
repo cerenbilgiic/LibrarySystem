@@ -26,22 +26,22 @@ public class Login extends JFrame {
         add(new JLabel("")); // Boşluk için
         add(btnLogin);
         btnLogin.addActionListener(e -> {
-            String email = txtUsername.getText();
+            String username = txtUsername.getText();
             // (Güvenlik kısmında ufak bir düzenleme: getPassword() kullanımı string'e doğru çevrilmelidir)
             String password = new String(txtPassword.getPassword());
 
-            if (email.isEmpty() || password.isEmpty()) {
+            if (username.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Tüm alanları doldurun!");
                 return;
             }
 
             LoginDAO dao = new LoginDAO();
 
-            if (dao.checkLogin(email, password)) {
+            if (dao.checkLogin(username, password)) {
                 JOptionPane.showMessageDialog(this, "Giriş Başarılı!");
 
                 // 1- Veritabanına gidip kişinin adını ve soyadını soruyoruz
-                String adSoyad = dao.getUserFullName(email);
+                String adSoyad = dao.getUserFullName(username);
 
                 this.dispose();
 

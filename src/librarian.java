@@ -3,9 +3,9 @@ import java.time.LocalDate;
 public class  librarian extends users{
     private int employee_id;
 
-    public librarian(int id , String first_name , String last_name , String email , String password , String role, LocalDate created_date ,int employee_id){
+    public librarian(int id , String first_name , String last_name , String username , String password , String role, LocalDate created_date ,int employee_id){
 
-        super(id,first_name,last_name,email,password,role,created_date);
+        super(id,first_name,last_name,username,password,role,created_date);
         this.employee_id=employee_id;
     }
 

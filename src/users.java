@@ -4,16 +4,16 @@ public abstract class users {
     protected int id;
     protected String first_name;
     protected String last_name;
-    protected String email;
+    protected String username;
     protected String password;
     protected String role;
     protected LocalDate created_at;
 
-    public users(int id, String first_name, String last_name, String email, String password, String role, LocalDate created_at) {
+    public users(int id, String first_name, String last_name, String username, String password, String role, LocalDate created_at) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
-        this.email = email;
+        this.username = username;
         this.password = password;
         this.role = role;
         this.created_at = created_at;
@@ -44,12 +44,12 @@ public abstract class users {
         this.last_name = last_name;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

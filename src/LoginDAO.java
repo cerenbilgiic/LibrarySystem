@@ -1,14 +1,14 @@
 import java.sql.*;
 
 public class LoginDAO {
-    public boolean checkLogin(String email, String password) {
-        // SQL: Email ve şifresi eşleşen bir kullanıcı var mı?
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+    public boolean checkLogin(String username, String password) {
+        // SQL: Kullanıcı adı ve şifresi eşleşen bir kullanıcı var mı?
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, email);
+            ps.setString(1, username);
             ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
@@ -19,14 +19,14 @@ public class LoginDAO {
             return false;
         }
     }
-    // E-postaya göre Adı ve Soyadı bulan metot
-    public String getUserFullName(String email) {
-        String sql = "SELECT first_name, last_name FROM users WHERE email = ?";
+    // Kullanıcı adına göre Adı ve Soyadı bulan metot
+    public String getUserFullName(String username) {
+        String sql = "SELECT first_name, last_name FROM users WHERE username = ?";
 
-        try (Connection conn = DBConnection.getConnection(); // (Siz DBConnection diye de kullanıyor olabilirsiniz, ona dikkat edin)
+        try (Connection conn = DBConnection.getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, email);
+            pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {

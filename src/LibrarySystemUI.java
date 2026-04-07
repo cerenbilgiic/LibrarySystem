@@ -10,7 +10,7 @@ public class LibrarySystemUI extends JFrame {
     private CardLayout cardLayout;
 
     // Form alanları
-    private JTextField txtMemberName, txtMemberSurname, txtMemberEmail, txtMemberPass;
+    private JTextField txtMemberName, txtMemberSurname, txtMemberUsername, txtMemberPass;
     private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography;
     private JTextField txtMemberId, txtBookId,txtCategoryId, txtAuthorId, txtCatNameIn , txtStock;
     private JButton btnSearchBook;
@@ -138,7 +138,7 @@ public class LibrarySystemUI extends JFrame {
 
         txtMemberName = new JTextField(15);
         txtMemberSurname = new JTextField(15);
-        txtMemberEmail = new JTextField(15);
+        txtMemberUsername = new JTextField(15);
         txtMemberPass = new JTextField(15);
 
         addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
@@ -146,14 +146,14 @@ public class LibrarySystemUI extends JFrame {
         addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
         addComponent(panel, txtMemberSurname, 1, 1, gbc);
         addComponent(panel, new JLabel("E-Posta:"), 0, 2, gbc);
-        addComponent(panel, txtMemberEmail, 1, 2, gbc);
+        addComponent(panel, txtMemberUsername, 1, 2, gbc);
         addComponent(panel, new JLabel("Şifre:"), 0, 3, gbc);
         addComponent(panel, txtMemberPass, 1, 3, gbc);
 
         JButton btnAdd = new JButton("Üye Ekle");
         btnAdd.setBackground(new Color(116, 185, 255));
         btnAdd.addActionListener(e -> {
-            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberEmail.getText(), txtMemberPass.getText()))
+            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberUsername.getText(), txtMemberPass.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
         });
         addComponent(panel, btnAdd, 1, 4, gbc);
@@ -183,7 +183,7 @@ public class LibrarySystemUI extends JFrame {
                         JOptionPane.showMessageDialog(this, "Üye bulundu ve kutucuklara dolduruldu.");
                         txtMemberName.setText(member.getFirst_name());
                         txtMemberSurname.setText(member.getLast_name());
-                        txtMemberEmail.setText(member.getEmail());
+                        txtMemberUsername.setText(member.getUsername());
                         txtMemberPass.setText(member.getPassword());
                     } else {
                         JOptionPane.showMessageDialog(this, "Böyle bir üye kaydı bulunamadı!");
@@ -224,7 +224,7 @@ public class LibrarySystemUI extends JFrame {
                         JOptionPane.showMessageDialog(this, "Üye başarıyla silindi!");
                         txtMemberName.setText("");
                         txtMemberSurname.setText("");
-                        txtMemberEmail.setText("");
+                        txtMemberUsername.setText("");
                         txtMemberPass.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "Üye silinemedi!");
@@ -251,13 +251,13 @@ public class LibrarySystemUI extends JFrame {
                                 if (exMember != null) {
                                     JTextField txtMemberName = new JTextField(exMember.getFirst_name());
                                     JTextField txtMemberSurname = new JTextField(exMember.getLast_name());
-                                    JTextField txtMemberEmail = new JTextField(exMember.getEmail());
+                                    JTextField txtMemberUsername = new JTextField(exMember.getUsername());
                                     JTextField txtMemberPassword = new JTextField(exMember.getPassword());
 
                                     Object[] message = {
                                             "Adı :", txtMemberName,
                                             "Soyadı: ", txtMemberSurname,
-                                            "Email: ", txtMemberEmail,
+                                            "K. Adı: ", txtMemberUsername,
                                             "Şifre: ", txtMemberPassword
                                     };
 
@@ -268,7 +268,7 @@ public class LibrarySystemUI extends JFrame {
                                                     exMember.getId(),
                                                     txtMemberName.getText(),
                                                     txtMemberSurname.getText(),
-                                                    txtMemberEmail.getText(),
+                                                    txtMemberUsername.getText(),
                                                     txtMemberPassword.getText()
                                             );
 
@@ -556,7 +556,7 @@ public class LibrarySystemUI extends JFrame {
     private JPanel createLoanPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50));
         panel.setBorder(BorderFactory.createTitledBorder("Ödünç Verme & İade İşlemleri"));
-        JTextField txtEmail = new JTextField(15);
+        JTextField txtUsername = new JTextField(15);
         JTextField txtBookNameInput = new JTextField(15);
         
         JButton btnBorrow = new JButton("Ödünç Ver");
@@ -566,7 +566,7 @@ public class LibrarySystemUI extends JFrame {
         btnReturn.setBackground(new Color(116, 185, 255));
         
         panel.add(new JLabel("Üye E-posta:"));
-        panel.add(txtEmail);
+        panel.add(txtUsername);
         panel.add(new JLabel("Kitap Adı:"));
         panel.add(txtBookNameInput);
         panel.add(btnBorrow);
@@ -574,14 +574,14 @@ public class LibrarySystemUI extends JFrame {
         
         btnBorrow.addActionListener(e -> {
             try {
-                String email = txtEmail.getText().trim();
+                String username = txtUsername.getText().trim();
                 String bName = txtBookNameInput.getText().trim();
-                if (email.isEmpty() || bName.isEmpty()) {
+                if (username.isEmpty() || bName.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Lütfen E-posta ve Kitap Adı giriniz!");
                     return;
                 }
                 
-                member m = memberDAO.getMemberByEmail(email);
+                member m = memberDAO.getMemberByUsername(username);
                 if (m == null) {
                     JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz E-posta)!");
                     return;
@@ -595,7 +595,7 @@ public class LibrarySystemUI extends JFrame {
                 
                 if (loanDAO.issueLoan(m.getId(), b.getId())) {
                     JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
-                    txtEmail.setText("");
+                    txtUsername.setText("");
                     txtBookNameInput.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "İşlem başarısız! Kitap stokta olmayabilir.");
@@ -605,14 +605,14 @@ public class LibrarySystemUI extends JFrame {
 
         btnReturn.addActionListener(e -> {
             try {
-                String email = txtEmail.getText().trim();
+                String username = txtUsername.getText().trim();
                 String bName = txtBookNameInput.getText().trim();
-                if (email.isEmpty() || bName.isEmpty()) {
+                if (username.isEmpty() || bName.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Lütfen E-posta ve Kitap Adı giriniz!");
                     return;
                 }
                 
-                member m = memberDAO.getMemberByEmail(email);
+                member m = memberDAO.getMemberByUsername(username);
                 if (m == null) {
                     JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz E-posta)!");
                     return;
@@ -645,7 +645,7 @@ public class LibrarySystemUI extends JFrame {
                     if (secim == 0) { // Ödeme yapıldı iade al tıklandı
                         if (loanDAO.processReturn(m.getId(), b.getId(), pendingFine)) {
                             JOptionPane.showMessageDialog(this, "İade işlemi ve ceza tahsilatı başarıyla tamamlandı!");
-                            txtEmail.setText("");
+                            txtUsername.setText("");
                             txtBookNameInput.setText("");
                         } else {
                             JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
@@ -657,7 +657,7 @@ public class LibrarySystemUI extends JFrame {
                     // Ceza yoksa doğrudan iade edilir
                     if (loanDAO.processReturn(m.getId(), b.getId(), 0.0)) {
                         JOptionPane.showMessageDialog(this, "İade işlemi başarıyla tamamlandı!\nHerhangi bir ceza bulunmuyor.");
-                        txtEmail.setText("");
+                        txtUsername.setText("");
                         txtBookNameInput.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);

@@ -5,15 +5,15 @@ import java.util.List;
 
 public class MemberDAO {
     // ÜYE EKLE
-    public boolean addMember(String first_name , String last_name ,String email ,String password) {
-        String sql = "INSERT INTO users (first_name , last_name , email , password) VALUES (?, ?, ?, ?)";
+    public boolean addMember(String first_name , String last_name ,String username ,String password) {
+        String sql = "INSERT INTO users (first_name , last_name , username , password) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, first_name);
             pstmt.setString(2, last_name);
-            pstmt.setString(3, email);
+            pstmt.setString(3, username);
             pstmt.setString(4, password);
             return pstmt.executeUpdate() > 0;
 
@@ -49,7 +49,7 @@ public class MemberDAO {
                         rs.getInt("id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
-                        rs.getString("email"),
+                        rs.getString("username"),
                         rs.getString("password"),
                         rs.getString("role"),
                         creationDate, // <-- Hata çıkartan kısım düzeltildi.
@@ -67,13 +67,13 @@ public class MemberDAO {
     }
 
 
-    // e-posta üzerinden üye arama işlemi
-    public member getMemberByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
+    // username üzerinden üye arama işlemi
+    public member getMemberByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, email.trim());
+            pstmt.setString(1, username.trim());
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()){
@@ -84,7 +84,7 @@ public class MemberDAO {
                         rs.getInt("id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
-                        rs.getString("email"),
+                        rs.getString("username"),
                         rs.getString("password"),
                         rs.getString("role"),
                         creationDate,
@@ -119,8 +119,8 @@ public class MemberDAO {
     }
 
     //üye güncelleme
-    public boolean updateMember(int id , String first_name , String last_name , String email , String password) {
-        String sql = "UPDATE users SET first_name = ?, last_name = ?, email = ?, password = ? WHERE id = ?";
+    public boolean updateMember(int id , String first_name , String last_name , String username , String password) {
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, username = ?, password = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -128,7 +128,7 @@ public class MemberDAO {
 
             pstmt.setString(1, first_name);
             pstmt.setString(2, last_name);
-            pstmt.setString(3, email);
+            pstmt.setString(3, username);
             pstmt.setString(4,password);
             pstmt.setInt(5,id);
 
