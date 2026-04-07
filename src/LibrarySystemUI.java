@@ -347,6 +347,11 @@ public class LibrarySystemUI extends JFrame {
                 return;
             }
 
+            if (isbn.length() != 13) {
+                JOptionPane.showMessageDialog(this, "Hata: ISBN tam olarak 13 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             if (bookDAO.isIsbnExists(isbn)) {
                 JOptionPane.showMessageDialog(this,
                         "Bu ISBN zaten kayıtlı!",
@@ -500,6 +505,12 @@ public class LibrarySystemUI extends JFrame {
                     int option = JOptionPane.showConfirmDialog(this, message, "Kitap Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
                     if (option == JOptionPane.OK_OPTION) {
                         try {
+                            String updatedIsbn = txtIsbnEdit.getText().trim();
+                            if (updatedIsbn.length() != 13) {
+                                JOptionPane.showMessageDialog(this, "Hata: ISBN tam olarak 13 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
+
                             authors newAuthor = authorDAO.getAuthorByName(txtAuthNameEdit.getText().trim(), txtAuthSurnameEdit.getText().trim());
 
                             if (newAuthor == null) {
@@ -510,7 +521,7 @@ public class LibrarySystemUI extends JFrame {
 
                             boolean success = bookDAO.updateBook(
                                     exBook.getId(),
-                                    txtIsbnEdit.getText(),
+                                    updatedIsbn,
                                     txtNameEdit.getText(),
                                     newAuthor.getId(),
                                     getCategoryId((String)comboCatEdit.getSelectedItem()),
