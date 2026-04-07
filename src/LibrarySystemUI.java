@@ -163,22 +163,10 @@ public class LibrarySystemUI extends JFrame {
         JButton btnSearchMember = new JButton("Üye Ara");
         btnSearchMember.setBackground(new Color(116, 185, 255));
         btnSearchMember.addActionListener(e -> {
-            String searchTitle = JOptionPane.showInputDialog(this, "Üye adı soyadı girin:"); // Kullanıcıya uyarı eklendi
-            if (searchTitle != null && !searchTitle.trim().isEmpty()) {
+            String searchUsername = JOptionPane.showInputDialog(this, "Üyenin Kullanıcı Adını Giriniz:"); 
+            if (searchUsername != null && !searchUsername.trim().isEmpty()) {
                 try {
-                    String[] parts = searchTitle.trim().split("\\s+");
-                    if(parts.length < 2) {
-                        JOptionPane.showMessageDialog(this, "Lütfen arama yaparken hem isim hem de soyisim giriniz!");
-                        return;
-                    }
-                    String last_name = parts[parts.length - 1];
-
-                    StringBuilder isimBuilder = new StringBuilder();
-                    for (int i = 0; i < parts.length - 1; i++) {
-                        isimBuilder.append(parts[i]).append(" ");
-                    }
-                    String first_name = isimBuilder.toString().trim();
-                    member member = new MemberDAO().getMemberByName(first_name, last_name);
+                    member member = new MemberDAO().getMemberByUsername(searchUsername.trim());
                     if (member != null) {
                         JOptionPane.showMessageDialog(this, "Üye bulundu ve kutucuklara dolduruldu.");
                         txtMemberName.setText(member.getFirst_name());
