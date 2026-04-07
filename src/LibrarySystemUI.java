@@ -147,16 +147,22 @@ public class LibrarySystemUI extends JFrame {
 
         addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
         addComponent(panel, txtMemberName, 1, 0, gbc);
+
         addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
         addComponent(panel, txtMemberSurname, 1, 1, gbc);
-        addComponent(panel , new JLabel("Üye TC: ") , 0, 2,gbc);
-        addComponent(panel , txtMemberTC ,1,2,gbc);
+
+        addComponent(panel, new JLabel("Üye TC: "), 0, 2, gbc);
+        addComponent(panel, txtMemberTC, 1, 2, gbc);
 
         JButton btnAdd = new JButton("Üye Ekle");
         btnAdd.setBackground(new Color(116, 185, 255));
         btnAdd.addActionListener(e -> {
             if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberTC.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
+
+           txtMemberName.setText("");
+           txtMemberSurname.setText("");
+            txtMemberTC.setText("");
         });
         addComponent(panel, btnAdd, 1, 4, gbc);
 
@@ -229,15 +235,17 @@ public class LibrarySystemUI extends JFrame {
         if (searchTC != null && !searchTC.trim().isEmpty()) {
         try {
         member exMember = new MemberDAO().getMemberByTC(searchTC.trim());
-        if (exMember != null) {
-        JTextField txtMemberName = new JTextField(exMember.getFirst_name());
-        JTextField txtMemberSurname = new JTextField(exMember.getLast_name());
-        JTextField txtMemberTC = new JTextField(exMember.getTC());
-        Object[] message = {
-        "Adı :", txtMemberName,
-        "Soyadı: ", txtMemberSurname,
-        "TC: ", txtMemberTC,
-        };
+            if (exMember != null) {
+                // BURADA DEĞİŞKEN İSİMLERİNİN BAŞINA 'edit' EKLEDİK ÇAKIŞMAMASI İÇİN
+                JTextField editName = new JTextField(exMember.getFirst_name());
+                JTextField editSurname = new JTextField(exMember.getLast_name());
+                JTextField editTC = new JTextField(exMember.getTC());
+
+                Object[] message = {
+                        "Adı :", editName,
+                        "Soyadı: ", editSurname,
+                        "TC: ", editTC,
+                };
         int option = JOptionPane.showConfirmDialog(this, message, "Üye Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
 try {
@@ -559,7 +567,7 @@ try {
     private JPanel createLoanPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50));
         panel.setBorder(BorderFactory.createTitledBorder("Ödünç Verme & İade İşlemleri"));
-        JTextField txtUsername = new JTextField(15);
+        JTextField txtMemberTC = new JTextField(15);
         JTextField txtIsbnInput = new JTextField(15);
         
         JButton btnBorrow = new JButton("Ödünç Ver");

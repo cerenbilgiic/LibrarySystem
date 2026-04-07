@@ -50,7 +50,7 @@ public class MemberDAO {
                 );
             }
         } catch (Exception e) {
-            System.out.println("----- KULLANICI ADI İLE ÜYE ARAMADA HATA -----");
+            System.out.println("----- TC İLE ÜYE ARAMADA HATA -----");
             e.printStackTrace();
         }
         return null;
