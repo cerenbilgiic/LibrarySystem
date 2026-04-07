@@ -579,7 +579,7 @@ public class LibrarySystemUI extends JFrame {
         JButton btnReturn = new JButton("İade Al");
         btnReturn.setBackground(new Color(116, 185, 255));
         
-        panel.add(new JLabel("Üye E-posta:"));
+        panel.add(new JLabel("Üye Kullanıcı Adı:"));
         panel.add(txtUsername);
         panel.add(new JLabel("Kitap Adı:"));
         panel.add(txtBookNameInput);
@@ -591,13 +591,13 @@ public class LibrarySystemUI extends JFrame {
                 String username = txtUsername.getText().trim();
                 String bName = txtBookNameInput.getText().trim();
                 if (username.isEmpty() || bName.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen E-posta ve Kitap Adı giriniz!");
+                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve Kitap Adı giriniz!");
                     return;
                 }
                 
                 member m = memberDAO.getMemberByUsername(username);
                 if (m == null) {
-                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz E-posta)!");
+                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz Kullanıcı Adı)!");
                     return;
                 }
                 
@@ -622,13 +622,13 @@ public class LibrarySystemUI extends JFrame {
                 String username = txtUsername.getText().trim();
                 String bName = txtBookNameInput.getText().trim();
                 if (username.isEmpty() || bName.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen E-posta ve Kitap Adı giriniz!");
+                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve Kitap Adı giriniz!");
                     return;
                 }
                 
                 member m = memberDAO.getMemberByUsername(username);
                 if (m == null) {
-                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz E-posta)!");
+                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz Kullanıcı Adı)!");
                     return;
                 }
                 
@@ -857,12 +857,5 @@ public class LibrarySystemUI extends JFrame {
     private void addComponent(JPanel p, Component c, int x, int y, GridBagConstraints gbc) {
         gbc.gridx = x; gbc.gridy = y;
         p.add(c, gbc);
-    }
-
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (Exception e) { }
-        SwingUtilities.invokeLater(() -> new LibrarySystemUI("Yönetici").setVisible(true));
     }
 }
