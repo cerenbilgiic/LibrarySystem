@@ -874,6 +874,11 @@ try {
         btnAddEmployee.addActionListener(e -> {
             if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeUsername.getText(), txtEmployeePass.getText()))
                 JOptionPane.showMessageDialog(this, "Çalışan başarıyla eklendi!");
+
+            String employeeName = txtEmployeeName.getText().trim();
+            String employeeSurname = txtEmployeeSurname.getText().trim();
+            String employeeUsername = txtEmployeeUsername.getText().trim();
+            String employeePassword = txtEmployeePass.getText().trim();
         });
         addComponent(panel, btnAddEmployee, 1, 4, gbc);
 
