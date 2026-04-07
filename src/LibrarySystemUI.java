@@ -624,17 +624,44 @@ public class LibrarySystemUI extends JFrame {
                     return;
                 }
                 
-                double fine = loanDAO.returnBook(m.getId(), b.getId());
-                if (fine >= 0) {
-                    if (fine > 0) {
-                        JOptionPane.showMessageDialog(this, "İade işlemi başarılı!\nAncak gecikme cezası var: " + fine + " TL", "Ceza Bilgisi", JOptionPane.WARNING_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "İade işlemi başarılı!\nHerhangi bir ceza bulunmuyor.");
-                    }
-                    txtEmail.setText("");
-                    txtBookNameInput.setText("");
-                } else {
+                double pendingFine = loanDAO.getPendingFineAmount(m.getId(), b.getId());
+                
+                if (pendingFine == -1.0) {
                     JOptionPane.showMessageDialog(this, "Aktif bir ödünç kaydı bulunamadı veya hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                if (pendingFine > 0) {
+                    Object[] options = {"Ödeme Yapıldı İade Al", "Tamam"};
+                    int secim = JOptionPane.showOptionDialog(this,
+                            "Bu kitap için son teslim tarihi aşılmış!\nGecikme Cezası: " + pendingFine + " TL",
+                            "Ceza Uyarısı",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE,
+                            null,
+                            options,
+                            options[0]);
+                            
+                    if (secim == 0) { // Ödeme yapıldı iade al tıklandı
+                        if (loanDAO.processReturn(m.getId(), b.getId(), pendingFine)) {
+                            JOptionPane.showMessageDialog(this, "İade işlemi ve ceza tahsilatı başarıyla tamamlandı!");
+                            txtEmail.setText("");
+                            txtBookNameInput.setText("");
+                        } else {
+                            JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else { // Tamam veya X tıklandı
+                        // İade durduruldu, hiçbir şey değişmez
+                    }
+                } else {
+                    // Ceza yoksa doğrudan iade edilir
+                    if (loanDAO.processReturn(m.getId(), b.getId(), 0.0)) {
+                        JOptionPane.showMessageDialog(this, "İade işlemi başarıyla tamamlandı!\nHerhangi bir ceza bulunmuyor.");
+                        txtEmail.setText("");
+                        txtBookNameInput.setText("");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Bir hata oluştu: " + ex.getMessage()); }
         });

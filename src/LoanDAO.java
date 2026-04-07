@@ -61,51 +61,39 @@ public class LoanDAO {
         }
     }
 
-    // 2. Ceza Hesaplama ve Fines Tablosuna Ekleme İşlemi
-    public double calculateAndGetFine(int loanId) {
-        double fineAmount = 0.0;
-
-        try (Connection conn = DBConnection.getConnection()) {
-            String sql = "SELECT loan_date, return_date FROM loans WHERE id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, loanId);
+    // 2. Ceza Sorgulama (İade İşleminden Önce)
+    public double getPendingFineAmount(int userId, int bookId) {
+        String sql = "SELECT due_date FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Aktif'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, bookId);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
-                java.sql.Date dbLoanDate = rs.getDate("loan_date");
-                if (dbLoanDate != null) {
-                    LocalDate loanDate = dbLoanDate.toLocalDate();
+                java.sql.Date dbDueDate = rs.getDate("due_date");
+                if (dbDueDate != null) {
+                    LocalDate dueDate = dbDueDate.toLocalDate();
                     LocalDate today = LocalDate.now();
-
-                    long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(loanDate, today);
-
-                    if (daysBetween > 15) {
-                        fineAmount = (daysBetween - 15) * 5.0;
-
-                        String fineSql = "INSERT INTO fines (loan_id, amount, is_paid) VALUES (?, ?, false) " +
-                                "ON DUPLICATE KEY UPDATE amount = ?";
-                        PreparedStatement psFine = conn.prepareStatement(fineSql);
-                        psFine.setInt(1, loanId);
-                        psFine.setDouble(2, fineAmount);
-                        psFine.setDouble(3, fineAmount);
-                        psFine.executeUpdate();
+                    long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(dueDate, today);
+                    if (daysOverdue > 0) {
+                        return daysOverdue * 10.0; // Her gecikilen gün için 10 TL ceza
                     }
                 }
+                return 0.0; // Süresi içinde, ceza yok
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return fineAmount;
+        return -1.0; // Aktif kayıt yok
     }
 
-    // 3. İade Alma İşlemi
-    public double returnBook(int userId, int bookId) {
+    // 3. İade ve Ceza Tahsilat İşlemini Tamamlama
+    public boolean processReturn(int userId, int bookId, double fineAmount) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. ADIM: Aktif ödünç kaydını bul
             String findLoan = "SELECT id FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Aktif'";
             PreparedStatement psFind = conn.prepareStatement(findLoan);
             psFind.setInt(1, userId);
@@ -115,35 +103,40 @@ public class LoanDAO {
             if (rsFind.next()) {
                 int loanId = rsFind.getInt("id");
 
-                // 2. ADIM: İade tarihini ve durumu güncelle
+                // İade tarihini ve durumu güncelle
                 String updateLoan = "UPDATE loans SET return_date = ?, status = 'İade Edildi' WHERE id = ?";
                 PreparedStatement psUpdateLoan = conn.prepareStatement(updateLoan);
                 psUpdateLoan.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
                 psUpdateLoan.setInt(2, loanId);
                 psUpdateLoan.executeUpdate();
 
-                // 3. ADIM: Kitap stok sayısını 1 artır
+                // Kitap stok sayısını 1 artır
                 String updateStock = "UPDATE books SET stock = stock + 1 WHERE id = ?";
                 PreparedStatement psUpdateStock = conn.prepareStatement(updateStock);
                 psUpdateStock.setInt(1, bookId);
                 psUpdateStock.executeUpdate();
 
+                // Eğer ceza varsa ve ödenmişe (Ödeme Yapıldı Butonu ile) geldiyse kaydet
+                if (fineAmount > 0) {
+                    String fineSql = "INSERT INTO fines (loan_id, user_id, amount, is_paid) VALUES (?, ?, ?, true)";
+                    PreparedStatement psFine = conn.prepareStatement(fineSql);
+                    psFine.setInt(1, loanId);
+                    psFine.setInt(2, userId);
+                    psFine.setDouble(3, fineAmount);
+                    psFine.executeUpdate();
+                }
+
                 conn.commit();
-
-                // 4. ADIM: Ceza hesapla
-                // Not: conn.commit() yapıldığı için farklı connection açan metodu çağırmak güvenlidir
-                double fine = calculateAndGetFine(loanId);
-
-                return fine;
+                return true;
             } else {
-                return -1.0; // Aktif ödünç kaydı bulunamadı
+                return false;
             }
         } catch (Exception e) {
             if (conn != null) {
                 try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
             e.printStackTrace();
-            return -1.0;
+            return false;
         } finally {
             if (conn != null) {
                 try { conn.setAutoCommit(true); } catch (SQLException ex) { ex.printStackTrace(); }
