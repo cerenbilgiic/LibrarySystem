@@ -281,14 +281,8 @@ public class LibrarySystemUI extends JFrame {
     //KİTAP İŞLEMLERİ
 
     private int getCategoryId(String category) {
-        switch (category) {
-            case "Roman": return 1;
-            case "Masal": return 2;
-            case "Biyografi": return 3;
-            case "Otobiyografi": return 4;
-            case "Yazılım": return 5;
-            default: return 0;
-        }
+        categories c = new CategoryDAO().getCategoryByName(category.trim());
+        return (c != null) ? c.getId() : 0;
     }
 
     //kitap ekleme işlemi
@@ -305,11 +299,12 @@ public class LibrarySystemUI extends JFrame {
         txtBookAuthorSurname = new JTextField(15);
         txtStock = new JTextField(15);
 
-        String[] categories = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım"};
-        selectCategory = new JComboBox<>(categories);
-
-
-        selectCategory = new JComboBox<>(categories);
+        java.util.List<categories> allCats = new CategoryDAO().getAllCategories();
+        String[] dbCategories = new String[allCats.size()];
+        for (int i = 0; i < allCats.size(); i++) {
+            dbCategories[i] = allCats.get(i).getCategory_name();
+        }
+        selectCategory = new JComboBox<>(dbCategories);
         addComponent(panel, new JLabel("ISBN:"), 0, 0, gbc);
         addComponent(panel, txtIsbn, 1, 0, gbc);
 
@@ -496,7 +491,11 @@ public class LibrarySystemUI extends JFrame {
                     JTextField txtNameEdit = new JTextField(exBook.getBook_name());
                     JTextField txtAuthNameEdit = new JTextField(exBook.getAuthorName());
                     JTextField txtAuthSurnameEdit = new JTextField(exBook.getAuthorSurname());
-                    String[] categoriesList = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım"};
+                    java.util.List<categories> allCatsEdit = new CategoryDAO().getAllCategories();
+                    String[] categoriesList = new String[allCatsEdit.size()];
+                    for (int i = 0; i < allCatsEdit.size(); i++) {
+                        categoriesList[i] = allCatsEdit.get(i).getCategory_name();
+                    }
                     JComboBox<String> comboCatEdit = new JComboBox<>(categoriesList);
                     String foundCat = exBook.getCategory_name();
                     if (foundCat != null) {
