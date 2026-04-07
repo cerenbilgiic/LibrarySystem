@@ -558,20 +558,47 @@ public class LibrarySystemUI extends JFrame {
         panel.setBorder(BorderFactory.createTitledBorder("Ödünç Verme & İade İşlemleri"));
         txtMemberId = new JTextField(10);
         txtBookId = new JTextField(10);
-        JButton btnAction = new JButton("İşlemi Tamamla");
+        JButton btnBorrow = new JButton("Ödünç Ver");
+        btnBorrow.setBackground(new Color(116, 185, 255));
+        
+        JButton btnReturn = new JButton("İade Al");
+        btnReturn.setBackground(new Color(116, 185, 255));
+        
         panel.add(new JLabel("Üye ID:"));
         panel.add(txtMemberId);
         panel.add(new JLabel("Kitap ID:"));
         panel.add(txtBookId);
-        panel.add(btnAction);
-        btnAction.addActionListener(e -> {
+        panel.add(btnBorrow);
+        panel.add(btnReturn);
+        
+        btnBorrow.addActionListener(e -> {
             try {
-                if (loanDAO.issueLoan(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText())))
-                    JOptionPane.showMessageDialog(this, "İşlem Başarılı!");
+                if (loanDAO.issueLoan(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText()))) {
+                    JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "İşlem başarısız! Kitap stokta olmayabilir veya hatalı ID.");
+                }
             } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Lütfen geçerli ID giriniz!"); }
         });
+
+        btnReturn.addActionListener(e -> {
+            try {
+                double fine = loanDAO.returnBook(Integer.parseInt(txtMemberId.getText()), Integer.parseInt(txtBookId.getText()));
+                if (fine >= 0) {
+                    if (fine > 0) {
+                        JOptionPane.showMessageDialog(this, "İade işlemi başarılı!\nAncak gecikme cezası var: " + fine + " TL", "Ceza Bilgisi", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "İade işlemi başarılı!\nHerhangi bir ceza bulunmuyor.");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Aktif bir ödünç kaydı bulunamadı veya hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Lütfen geçerli ID giriniz!"); }
+        });
+        
         return panel;
     }
+
 
     //YAZAR İŞLEMLERİ
 

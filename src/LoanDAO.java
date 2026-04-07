@@ -97,4 +97,57 @@ public class LoanDAO {
         }
         return fineAmount;
     }
+
+    // 3. İade Alma İşlemi
+    public double returnBook(int userId, int bookId) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. ADIM: Aktif ödünç kaydını bul
+            String findLoan = "SELECT id FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Aktif'";
+            PreparedStatement psFind = conn.prepareStatement(findLoan);
+            psFind.setInt(1, userId);
+            psFind.setInt(2, bookId);
+            ResultSet rsFind = psFind.executeQuery();
+
+            if (rsFind.next()) {
+                int loanId = rsFind.getInt("id");
+
+                // 2. ADIM: İade tarihini ve durumu güncelle
+                String updateLoan = "UPDATE loans SET return_date = ?, status = 'İade Edildi' WHERE id = ?";
+                PreparedStatement psUpdateLoan = conn.prepareStatement(updateLoan);
+                psUpdateLoan.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
+                psUpdateLoan.setInt(2, loanId);
+                psUpdateLoan.executeUpdate();
+
+                // 3. ADIM: Kitap stok sayısını 1 artır
+                String updateStock = "UPDATE books SET stock = stock + 1 WHERE id = ?";
+                PreparedStatement psUpdateStock = conn.prepareStatement(updateStock);
+                psUpdateStock.setInt(1, bookId);
+                psUpdateStock.executeUpdate();
+
+                conn.commit();
+
+                // 4. ADIM: Ceza hesapla
+                // Not: conn.commit() yapıldığı için farklı connection açan metodu çağırmak güvenlidir
+                double fine = calculateAndGetFine(loanId);
+
+                return fine;
+            } else {
+                return -1.0; // Aktif ödünç kaydı bulunamadı
+            }
+        } catch (Exception e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            e.printStackTrace();
+            return -1.0;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        }
+    }
 }
