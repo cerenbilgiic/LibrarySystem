@@ -1,5 +1,3 @@
-import com.mysql.cj.x.protobuf.MysqlxCrud;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,7 +44,7 @@ public class BookDAO {
     }
 
     // 2. Kitap Arama
-    public books getBookByIsbn(String isbn) {
+    public books getBookByName(String bookName) {
         String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
                 "b.author_id, b.category_id, b.stock, " +
                 "a.author_name, a.author_surname, c.category_name " +
@@ -58,7 +56,7 @@ public class BookDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, isbn.trim());
+            pstmt.setString(1, bookName.trim());
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
