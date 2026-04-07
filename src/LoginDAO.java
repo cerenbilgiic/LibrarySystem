@@ -1,15 +1,15 @@
 import java.sql.*;
 
 public class LoginDAO {
-    public boolean checkLogin(String username, String password) {
+    public boolean checkLogin(String tc, String password) {
         // SQL: Kullanıcı adı ve şifresi eşleşen bir kullanıcı var mı ve çalışan mı?
         // Kütüphane üyelerinin (Kütüphane Üyesi) sisteme giriş yapmasını engelliyoruz.
-        String sql = "SELECT role FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT role FROM users WHERE tc = ? AND password = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, username);
+            ps.setString(1, tc);
             ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
@@ -30,13 +30,13 @@ public class LoginDAO {
         }
     }
     // Kullanıcı adına göre Adı ve Soyadı bulan metot
-    public String getUserFullName(String username) {
-        String sql = "SELECT first_name, last_name FROM users WHERE username = ?";
+    public String getUserFullName(String tc) {
+        String sql = "SELECT first_name, last_name FROM users WHERE tc = ?";
 
         try (Connection conn = DBConnection.getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, username);
+            pstmt.setString(1, tc);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {

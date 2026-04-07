@@ -5,10 +5,10 @@ public class member extends users {
     private int maxAllowedbooks = 5;
 
     public member(int id, String first_name , String last_name ,
-                  String username , String role ,
+                  String tc , String role ,
                   LocalDate created_at , int maxAllowedbooks){
 
-        super(id , first_name , last_name , username ,null , role , created_at);
+        super(id , first_name , last_name , tc ,null , role , created_at);
 
         this.role = "Kütüphane Üyesi";
         this.maxAllowedbooks = maxAllowedbooks;

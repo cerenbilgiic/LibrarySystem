@@ -10,12 +10,12 @@ public class LibrarySystemUI extends JFrame {
     private CardLayout cardLayout;
 
     // Form alanları
-    private JTextField txtMemberName, txtMemberSurname, txtMemberUsername;
+    private JTextField txtMemberName, txtMemberSurname, txtMemberTC;
     private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography;
     private JTextField txtMemberId, txtBookId,txtCategoryId, txtAuthorId, txtCatNameIn , txtStock;
     private JButton btnSearchBook;
     private JComboBox<String> selectCategory;
-    private JTextField txtEmployeeName, txtEmployeeSurname , txtEmployeeUsername, txtEmployeePass,txtEmployeeId;
+    private JTextField txtEmployeeName, txtEmployeeSurname , txtEmployeeTC, txtEmployeePass,txtEmployeeId;
 
     JTextField txtBookAuthorName;
     JTextField txtBookAuthorSurname;
@@ -143,20 +143,19 @@ public class LibrarySystemUI extends JFrame {
 
         txtMemberName = new JTextField(15);
         txtMemberSurname = new JTextField(15);
-        txtMemberUsername = new JTextField(15);
+        txtMemberTC = new JTextField(15);
 
         addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
         addComponent(panel, txtMemberName, 1, 0, gbc);
         addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
         addComponent(panel, txtMemberSurname, 1, 1, gbc);
-        addComponent(panel, new JLabel("Kullanıcı Adı:"), 0, 2, gbc);
-        addComponent(panel, txtMemberUsername, 1, 2, gbc);
-
+        addComponent(panel , new JLabel("Üye TC: ") , 0, 2,gbc);
+        addComponent(panel , txtMemberTC ,1,2,gbc);
 
         JButton btnAdd = new JButton("Üye Ekle");
         btnAdd.setBackground(new Color(116, 185, 255));
         btnAdd.addActionListener(e -> {
-            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberUsername.getText()))
+            if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberTC.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
         });
         addComponent(panel, btnAdd, 1, 4, gbc);
@@ -166,15 +165,15 @@ public class LibrarySystemUI extends JFrame {
         JButton btnSearchMember = new JButton("Üye Ara");
         btnSearchMember.setBackground(new Color(116, 185, 255));
         btnSearchMember.addActionListener(e -> {
-            String searchUsername = JOptionPane.showInputDialog(this, "Üyenin Kullanıcı Adını Giriniz:");
-            if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+            String searchTC = JOptionPane.showInputDialog(this, "Üyenin TC Kimlik Numarasını Giriniz:");
+            if (searchTC != null && !searchTC.trim().isEmpty()) {
                 try {
-                    member member = new MemberDAO().getMemberByUsername(searchUsername.trim());
+                    member member = new MemberDAO().getMemberByTC(searchTC.trim());
                     if (member != null) {
                         JOptionPane.showMessageDialog(this, "Üye bulundu ve kutucuklara dolduruldu.");
                         txtMemberName.setText(member.getFirst_name());
                         txtMemberSurname.setText(member.getLast_name());
-                        txtMemberUsername.setText(member.getUsername());
+                        txtMemberTC.setText(member.getTC());
                     } else {
                         JOptionPane.showMessageDialog(this, "Böyle bir üye kaydı bulunamadı!");
                     }
@@ -193,26 +192,26 @@ public class LibrarySystemUI extends JFrame {
 
         btnDeleteMember.addActionListener(e ->{
 
-            String username = txtMemberUsername.getText().trim();
+            String tc = txtMemberTC.getText().trim();
 
-            if (username.isEmpty()) {
+            if (tc.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lütfen silinecek üyeyi önce aratın!");
                 return;
             }
 
             int confirm = JOptionPane.showConfirmDialog(this,
-                    username + " kullanıcı adlı üyeyi silmek istediğinize emin misiniz?",
+                    txtMemberName.getText() + "  adlı üyeyi silmek istediğinize emin misiniz?",
                     "Silme Onayı", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                member member = new MemberDAO().getMemberByUsername(username);
+                member member = new MemberDAO().getMemberByTC(tc);
                 if (member != null) {
                     boolean success = new MemberDAO().DeleteMember(member.getId());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Üye başarıyla silindi!");
                         txtMemberName.setText("");
                         txtMemberSurname.setText("");
-                        txtMemberUsername.setText("");
+                        txtMemberTC.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "Üye silinemedi!");
                     }
@@ -225,19 +224,19 @@ public class LibrarySystemUI extends JFrame {
         JButton btnupdateMember = new JButton("Üye Güncelle");
         btnupdateMember.setBackground(new Color(116, 185, 255));
         btnupdateMember.addActionListener(e -> {
-        String searchUsername = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin Kullanıcı Adını Girin:");
+        String searchTC = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin Kullanıcı Adını Girin:");
 
-        if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+        if (searchTC != null && !searchTC.trim().isEmpty()) {
         try {
-        member exMember = new MemberDAO().getMemberByUsername(searchUsername.trim());
+        member exMember = new MemberDAO().getMemberByTC(searchTC.trim());
         if (exMember != null) {
         JTextField txtMemberName = new JTextField(exMember.getFirst_name());
         JTextField txtMemberSurname = new JTextField(exMember.getLast_name());
-        JTextField txtMemberUsername = new JTextField(exMember.getUsername());
+        JTextField txtMemberTC = new JTextField(exMember.getTC());
         Object[] message = {
         "Adı :", txtMemberName,
         "Soyadı: ", txtMemberSurname,
-        "Kullanıcı. Adı: ", txtMemberUsername,
+        "TC: ", txtMemberTC,
         };
         int option = JOptionPane.showConfirmDialog(this, message, "Üye Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
@@ -246,7 +245,7 @@ try {
     exMember.getId(),
     txtMemberName.getText(),
     txtMemberSurname.getText(),
-    txtMemberUsername.getText()
+    txtMemberTC.getText()
     );
 
     if (success) {
@@ -569,8 +568,8 @@ try {
         JButton btnReturn = new JButton("İade Al");
         btnReturn.setBackground(new Color(116, 185, 255));
         
-        panel.add(new JLabel("Üye Kullanıcı Adı:"));
-        panel.add(txtUsername);
+        panel.add(new JLabel("Üye TC:"));
+        panel.add(txtMemberTC);
         panel.add(new JLabel("Kitap ISBN:"));
         panel.add(txtIsbnInput);
         panel.add(btnBorrow);
@@ -578,16 +577,16 @@ try {
         
         btnBorrow.addActionListener(e -> {
             try {
-                String username = txtUsername.getText().trim();
+                String tc = txtMemberTC.getText().trim();
                 String bIsbn = txtIsbnInput.getText().trim();
-                if (username.isEmpty() || bIsbn.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve Kitap ISBN giriniz!");
+                if (tc.isEmpty() || bIsbn.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Lütfen TC ve Kitap ISBN giriniz!");
                     return;
                 }
                 
-                member m = memberDAO.getMemberByUsername(username);
+                member m = memberDAO.getMemberByTC(tc);
                 if (m == null) {
-                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz Kullanıcı Adı)!");
+                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz TC Kimlik Numarası)!");
                     return;
                 }
                 
@@ -599,7 +598,7 @@ try {
                 
                 if (loanDAO.issueLoan(m.getId(), b.getId())) {
                     JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
-                    txtUsername.setText("");
+                    txtMemberTC.setText("");
                     txtIsbnInput.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "İşlem başarısız! Kitap stokta olmayabilir.");
@@ -609,16 +608,16 @@ try {
 
         btnReturn.addActionListener(e -> {
             try {
-                String username = txtUsername.getText().trim();
+                String tc = txtMemberTC.getText().trim();
                 String bIsbn = txtIsbnInput.getText().trim();
-                if (username.isEmpty() || bIsbn.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen Kullanıcı Adı ve Kitap ISBN giriniz!");
+                if (tc.isEmpty() || bIsbn.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Lütfen TC Kimlik ve Kitap ISBN giriniz!");
                     return;
                 }
                 
-                member m = memberDAO.getMemberByUsername(username);
+                member m = memberDAO.getMemberByTC(tc);
                 if (m == null) {
-                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz Kullanıcı Adı)!");
+                    JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz TC Kimlik Numarası)!");
                     return;
                 }
                 
@@ -649,7 +648,7 @@ try {
                     if (secim == 0) { // Ödeme yapıldı iade al tıklandı
                         if (loanDAO.processReturn(m.getId(), b.getId(), pendingFine)) {
                             JOptionPane.showMessageDialog(this, "İade işlemi ve ceza tahsilatı başarıyla tamamlandı!");
-                            txtUsername.setText("");
+                            txtMemberTC.setText("");
                             txtIsbnInput.setText("");
                         } else {
                             JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
@@ -661,7 +660,7 @@ try {
                     // Ceza yoksa doğrudan iade edilir
                     if (loanDAO.processReturn(m.getId(), b.getId(), 0.0)) {
                         JOptionPane.showMessageDialog(this, "İade işlemi başarıyla tamamlandı!\nHerhangi bir ceza bulunmuyor.");
-                        txtUsername.setText("");
+                        txtMemberTC.setText("");
                         txtIsbnInput.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
@@ -857,27 +856,27 @@ try {
 
        txtEmployeeName = new JTextField(15);
         txtEmployeeSurname = new JTextField(15);
-        txtEmployeeUsername = new JTextField(15);
+        txtEmployeeTC = new JTextField(15);
         txtEmployeePass = new JTextField(15);
 
         addComponent(panel, new JLabel("Adı:"), 0, 0, gbc);
         addComponent(panel, txtEmployeeName, 1, 0, gbc);
         addComponent(panel, new JLabel("Soyadı:"), 0, 1, gbc);
         addComponent(panel, txtEmployeeSurname, 1, 1, gbc);
-        addComponent(panel, new JLabel("Kullanıcı Adı:"), 0, 2, gbc);
-        addComponent(panel, txtEmployeeUsername, 1, 2, gbc);
+        addComponent(panel, new JLabel("Çalışan TC:"), 0, 2, gbc);
+        addComponent(panel, txtEmployeeTC, 1, 2, gbc);
         addComponent(panel, new JLabel("Şifre:"), 0, 3, gbc);
         addComponent(panel, txtEmployeePass, 1, 3, gbc);
 
         JButton btnAddEmployee = new JButton("Çalışan Ekle");
         btnAddEmployee.setBackground(new Color(116, 185, 255));
         btnAddEmployee.addActionListener(e -> {
-            if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeUsername.getText(), txtEmployeePass.getText()))
+            if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeTC.getText(), txtEmployeePass.getText()))
                 JOptionPane.showMessageDialog(this, "Çalışan başarıyla eklendi!");
 
             String employeeName = txtEmployeeName.getText().trim();
             String employeeSurname = txtEmployeeSurname.getText().trim();
-            String employeeUsername = txtEmployeeUsername.getText().trim();
+            String employeeUsername = txtEmployeeTC.getText().trim();
             String employeePassword = txtEmployeePass.getText().trim();
         });
         addComponent(panel, btnAddEmployee, 1, 4, gbc);
@@ -887,15 +886,15 @@ try {
         JButton btnSearchEmployee = new JButton("Çalışan Ara");
         btnSearchEmployee.setBackground(new Color(116, 185, 255));
         btnSearchEmployee.addActionListener(e -> {
-            String searchUsername = JOptionPane.showInputDialog(this, "Çalışanın Kullanıcı Adını Giriniz:");
-            if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+            String searchTC = JOptionPane.showInputDialog(this, "Çalışanın TC Kimlik Numarasını Giriniz:");
+            if (searchTC != null && !searchTC.trim().isEmpty()) {
                 try {
-                    employees employees = new EmployeeDAO().getEmployeeByUsername(searchUsername.trim());
+                    employees employees = new EmployeeDAO().getEmployeeByTC(searchTC.trim());
                     if (employees != null) {
                         JOptionPane.showMessageDialog(this, "Çalışan bulundu ve kutucuklara dolduruldu.");
                         txtEmployeeName.setText(employees.getFirst_name());
                         txtEmployeeSurname.setText(employees.getLast_name());
-                        txtEmployeeUsername.setText(employees.getUsername());
+                        txtEmployeeTC.setText(employees.getTC());
                         txtEmployeePass.setText(employees.getPassword());
                     } else {
                         JOptionPane.showMessageDialog(this, "Böyle bir çalışan kaydı bulunamadı!");
@@ -915,26 +914,26 @@ try {
 
         btnDeleteEmployee.addActionListener(e ->{
 
-            String username = txtEmployeeUsername.getText().trim();
+            String tc = txtEmployeeTC.getText().trim();
 
-            if (username.isEmpty()) {
+            if (tc.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lütfen silinecek çalışanı önce aratın!");
                 return;
             }
 
             int confirm = JOptionPane.showConfirmDialog(this,
-                    username + " kullanıcı adlı çalışanı silmek istediğinize emin misiniz?",
+                    txtEmployeeName .getText()+ "  adlı çalışanı silmek istediğinize emin misiniz?",
                     "Silme Onayı", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                employees employees = new EmployeeDAO().getEmployeeByUsername(username);
+                employees employees = new EmployeeDAO().getEmployeeByTC(tc);
                 if (employees != null) {
                     boolean success = new EmployeeDAO().DeleteEmployee(employees.getId());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Çalışan başarıyla silindi!");
                       txtEmployeeName.setText("");
                         txtEmployeeSurname.setText("");
-                        txtEmployeeUsername.setText("");
+                        txtEmployeeTC.setText("");
                         txtEmployeePass.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "Çalışan silinemedi!");
@@ -948,22 +947,22 @@ try {
         JButton btnupdateEmployee = new JButton("Çalışan Güncelle");
         btnupdateEmployee.setBackground(new Color(116, 185, 255));
         btnupdateEmployee.addActionListener(e -> {
-            String searchUsername = JOptionPane.showInputDialog(this, "Düzenlenecek Çalışanın Kullanıcı Adını Girin:");
+            String searchTC = JOptionPane.showInputDialog(this, "Düzenlenecek Çalışanın TC Kimlik Numarasını Girin:");
 
-            if (searchUsername != null && !searchUsername.trim().isEmpty()) {
+            if (searchTC != null && !searchTC.trim().isEmpty()) {
                 try {
-                    employees exEmployee = new EmployeeDAO().getEmployeeByUsername(searchUsername.trim());
+                    employees exEmployee = new EmployeeDAO().getEmployeeByTC(searchTC.trim());
 
                     if (exEmployee != null) {
                         JTextField txtEmployeeName = new JTextField(exEmployee.getFirst_name());
                         JTextField txtEmployeeSurname = new JTextField(exEmployee.getLast_name());
-                        JTextField txtEmployeeUsername = new JTextField(exEmployee.getUsername());
+                        JTextField txtEmployeeTC = new JTextField(exEmployee.getTC());
                         JTextField txtEmployeePassword = new JTextField(exEmployee.getPassword());
 
                         Object[] message = {
                                 "Adı :", txtEmployeeName,
                                 "Soyadı: ", txtEmployeeSurname,
-                                "K. Adı: ", txtEmployeeUsername,
+                                "TC: ", txtEmployeeTC,
                                 "Şifre: ", txtEmployeePass
                         };
 
@@ -974,7 +973,7 @@ try {
                                         exEmployee.getId(),
                                         txtEmployeeName.getText(),
                                         txtEmployeeSurname.getText(),
-                                        txtEmployeeUsername.getText(),
+                                        txtEmployeeTC.getText(),
                                         txtEmployeePassword.getText()
                                 );
 
