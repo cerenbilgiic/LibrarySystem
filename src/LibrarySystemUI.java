@@ -427,7 +427,15 @@ public class LibrarySystemUI extends JFrame {
                 txtBookAuthorName.setText(foundBook.getAuthorName());
                 txtBookAuthorSurname.setText(foundBook.getAuthorSurname());
 
-                selectCategory.setSelectedItem(foundBook.getCategory_name());
+                String foundCat = foundBook.getCategory_name();
+                if (foundCat != null) {
+                    for (int i = 0; i < selectCategory.getItemCount(); i++) {
+                        if (selectCategory.getItemAt(i).toString().equalsIgnoreCase(foundCat.trim())) {
+                            selectCategory.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                }
                 txtStock.setText(String.valueOf(foundBook.getStock()));
 
                 JOptionPane.showMessageDialog(this, "Kitap bulundu!");
@@ -488,8 +496,17 @@ public class LibrarySystemUI extends JFrame {
                     JTextField txtNameEdit = new JTextField(exBook.getBook_name());
                     JTextField txtAuthNameEdit = new JTextField(exBook.getAuthorName());
                     JTextField txtAuthSurnameEdit = new JTextField(exBook.getAuthorSurname());
-                    JComboBox<String> comboCatEdit = new JComboBox<>();
-                    comboCatEdit.setSelectedItem(exBook.getCategory_name());
+                    String[] categoriesList = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım"};
+                    JComboBox<String> comboCatEdit = new JComboBox<>(categoriesList);
+                    String foundCat = exBook.getCategory_name();
+                    if (foundCat != null) {
+                        for (int i = 0; i < comboCatEdit.getItemCount(); i++) {
+                            if (comboCatEdit.getItemAt(i).toString().equalsIgnoreCase(foundCat.trim())) {
+                                comboCatEdit.setSelectedIndex(i);
+                                break;
+                            }
+                        }
+                    }
                     JTextField txtStockEdit = new JTextField(String.valueOf(exBook.getStock()));
 
 
