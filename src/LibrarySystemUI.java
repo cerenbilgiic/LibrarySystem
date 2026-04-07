@@ -595,6 +595,8 @@ public class LibrarySystemUI extends JFrame {
                 
                 if (loanDAO.issueLoan(m.getId(), b.getId())) {
                     JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
+                    txtEmail.setText("");
+                    txtBookNameInput.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "İşlem başarısız! Kitap stokta olmayabilir.");
                 }
@@ -629,6 +631,8 @@ public class LibrarySystemUI extends JFrame {
                     } else {
                         JOptionPane.showMessageDialog(this, "İade işlemi başarılı!\nHerhangi bir ceza bulunmuyor.");
                     }
+                    txtEmail.setText("");
+                    txtBookNameInput.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "Aktif bir ödünç kaydı bulunamadı veya hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                 }
