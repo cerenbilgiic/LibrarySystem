@@ -291,6 +291,17 @@ public class LibrarySystemUI extends JFrame {
         }
     }
 
+    private String getCategoryNameById(int id) {
+        switch (id) {
+            case 1: return "Roman";
+            case 2: return "Masal";
+            case 3: return "Biyografi";
+            case 4: return "Otobiyografi";
+            case 5: return "Yazılım";
+            default: return "Roman";
+        }
+    }
+
     //kitap ekleme işlemi
     private JPanel createBookPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -427,15 +438,7 @@ public class LibrarySystemUI extends JFrame {
                 txtBookAuthorName.setText(foundBook.getAuthorName());
                 txtBookAuthorSurname.setText(foundBook.getAuthorSurname());
 
-                String foundCat = foundBook.getCategory_name();
-                if (foundCat != null) {
-                    for (int i = 0; i < selectCategory.getItemCount(); i++) {
-                        if (selectCategory.getItemAt(i).toString().equalsIgnoreCase(foundCat.trim())) {
-                            selectCategory.setSelectedIndex(i);
-                            break;
-                        }
-                    }
-                }
+                selectCategory.setSelectedItem(getCategoryNameById(foundBook.getCategoryId()));
                 txtStock.setText(String.valueOf(foundBook.getStock()));
 
                 JOptionPane.showMessageDialog(this, "Kitap bulundu!");
@@ -498,6 +501,7 @@ public class LibrarySystemUI extends JFrame {
                     JTextField txtAuthSurnameEdit = new JTextField(exBook.getAuthorSurname());
                     String[] categoriesList = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım"};
                     JComboBox<String> comboCatEdit = new JComboBox<>(categoriesList);
+                    comboCatEdit.setSelectedItem(getCategoryNameById(exBook.getCategoryId()));
                     String foundCat = exBook.getCategory_name();
                     if (foundCat != null) {
                         for (int i = 0; i < comboCatEdit.getItemCount(); i++) {
