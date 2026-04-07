@@ -6,7 +6,7 @@ import java.util.List;
 public class EmployeeDAO {
     // ÇALIŞAN EKLEME
     public boolean addEmployee(String first_name , String last_name ,String username ,String password) {
-        String sql = "INSERT INTO users (first_name , last_name , username , password) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (first_name , last_name , username , password, role) VALUES (?, ?, ?, ?, 'Kütüphane Çalışanı')";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

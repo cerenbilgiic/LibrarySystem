@@ -2,8 +2,9 @@ import java.sql.*;
 
 public class LoginDAO {
     public boolean checkLogin(String username, String password) {
-        // SQL: Kullanıcı adı ve şifresi eşleşen bir kullanıcı var mı?
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        // SQL: Kullanıcı adı ve şifresi eşleşen bir kullanıcı var mı ve çalışan mı?
+        // Kütüphane üyelerinin (Kütüphane Üyesi) sisteme giriş yapmasını engelliyoruz.
+        String sql = "SELECT role FROM users WHERE username = ? AND password = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -12,7 +13,16 @@ public class LoginDAO {
             ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
-            return rs.next(); // Eğer bir satır döndüyse (kullanıcı bulunduysa) true döner.
+            if (rs.next()) {
+                String role = rs.getString("role");
+                // Rolü "Kütüphane Üyesi" olanlar giriş yapamaz.
+                // Kütüphane Çalışanı , Çalışan , Yönetici vs. giriş yapabilir.
+                if (role != null && (role.equalsIgnoreCase("Kütüphane Üyesi") || role.equalsIgnoreCase("Üye"))) {
+                    return false; // Üyelerin giriş izni yok
+                }
+                return true; // Kullanıcı bulundu ve üye değil (çalışan), giriş yapabilir
+            }
+            return false;
 
         } catch (SQLException e) {
             e.printStackTrace();

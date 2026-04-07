@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberDAO {
-    // ÜYE EKLE
     public boolean addMember(String first_name , String last_name ,String username ) {
-        String sql = "INSERT INTO users (first_name , last_name , username) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (first_name , last_name , username, role) VALUES (?, ?, ?, 'Kütüphane Üyesi')";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
