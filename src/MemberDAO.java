@@ -20,8 +20,10 @@ public class MemberDAO {
         }
         return false;
     }
-    public boolean addMember(String first_name , String last_name ,String tc  ) {
-        String sql = "INSERT INTO users (first_name , last_name , tc, role) VALUES (?, ?, ?, 'KÜTÜPHANE ÜYESİ')";
+
+    public boolean addMember(String first_name , String last_name ,String tc ) {
+        // maxAllowedbooks kolonunu başlangıçta 6 olarak ekliyoruz
+        String sql = "INSERT INTO users (first_name , last_name , tc, role, maxAllowedbooks) VALUES (?, ?, ?, 'KÜTÜPHANE ÜYESİ', 6)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

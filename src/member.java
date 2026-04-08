@@ -2,7 +2,7 @@ import java.time.LocalDate;
 
 public class member extends users {
 
-    private int maxAllowedbooks = 5;
+    private int maxAllowedbooks = 6;
 
     public member(int id, String first_name , String last_name ,
                   String tc , String role ,

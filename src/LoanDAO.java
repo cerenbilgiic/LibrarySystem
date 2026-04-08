@@ -23,28 +23,43 @@ public class LoanDAO {
             ResultSet rs = psStock.executeQuery();
 
             if (rs.next() && rs.getInt("stock") > 0) {
-                // 2. ADIM: Loans tablosuna kaydet
-                String insertLoan = "INSERT INTO loans (user_id, book_id, loan_date, due_date, status) VALUES (?, ?, ?, ?, 'Ödünç Verildi')";
-                PreparedStatement psLoan = conn.prepareStatement(insertLoan);
+                // YENİ ADIM: Kullanıcının kitap alma hakkını (maxAllowedbooks) kontrol et
+                String userCheck = "SELECT maxAllowedbooks FROM users WHERE id = ?";
+                PreparedStatement psUser = conn.prepareStatement(userCheck);
+                psUser.setInt(1, userId);
+                ResultSet rsUser = psUser.executeQuery();
 
-                // --- FACTORY PATTERN BURADA DEVREYE GİRİYOR! ---
-                // Tarihleri ve temel bilgileri kendi yazdığımız Factory sınıfından çekiyoruz
-                loans newLoan = LoanFactory.createNewLoan(userId, bookId);
+                if (rsUser.next() && rsUser.getInt("maxAllowedbooks") > 0) {
+                    // 2. ADIM: Loans tablosuna kaydet
+                    String insertLoan = "INSERT INTO loans (user_id, book_id, loan_date, due_date, status) VALUES (?, ?, ?, ?, 'Ödünç Verildi')";
+                    PreparedStatement psLoan = conn.prepareStatement(insertLoan);
 
-                psLoan.setInt(1, newLoan.getUserId());
-                psLoan.setInt(2, newLoan.getBookId());
-                psLoan.setDate(3, java.sql.Date.valueOf(newLoan.getLoanDate()));
-                psLoan.setDate(4, java.sql.Date.valueOf(newLoan.getDueDate()));
-                psLoan.executeUpdate();
+                    loans newLoan = LoanFactory.createNewLoan(userId, bookId);
 
-                // 3. ADIM: Kitap stok sayısını 1 azalt
-                String updateStock = "UPDATE books SET stock = stock - 1 WHERE id = ?";
-                PreparedStatement psUpdate = conn.prepareStatement(updateStock);
-                psUpdate.setInt(1, bookId);
-                psUpdate.executeUpdate();
+                    psLoan.setInt(1, newLoan.getUserId());
+                    psLoan.setInt(2, newLoan.getBookId());
+                    psLoan.setDate(3, java.sql.Date.valueOf(newLoan.getLoanDate()));
+                    psLoan.setDate(4, java.sql.Date.valueOf(newLoan.getDueDate()));
+                    psLoan.executeUpdate();
 
-                conn.commit();
-                return true;
+                    // 3. ADIM: Kitap stok sayısını 1 azalt
+                    String updateStock = "UPDATE books SET stock = stock - 1 WHERE id = ?";
+                    PreparedStatement psUpdate = conn.prepareStatement(updateStock);
+                    psUpdate.setInt(1, bookId);
+                    psUpdate.executeUpdate();
+
+                    // YENİ ADIM: Kullanıcının kitap alma hakkını 1 azalt
+                    String updateUser = "UPDATE users SET maxAllowedbooks = maxAllowedbooks - 1 WHERE id = ?";
+                    PreparedStatement psUpdateUser = conn.prepareStatement(updateUser);
+                    psUpdateUser.setInt(1, userId);
+                    psUpdateUser.executeUpdate();
+
+                    conn.commit();
+                    return true;
+                } else {
+                    // Üyenin kitap alma hakkı dolmuş
+                    return false;
+                }
             } else {
                 return false;
             }
@@ -115,6 +130,12 @@ public class LoanDAO {
                 PreparedStatement psUpdateStock = conn.prepareStatement(updateStock);
                 psUpdateStock.setInt(1, bookId);
                 psUpdateStock.executeUpdate();
+
+                // YENİ ADIM: Kullanıcının kitap alma hakkını 1 artır
+                String updateUser = "UPDATE users SET maxAllowedbooks = maxAllowedbooks + 1 WHERE id = ?";
+                PreparedStatement psUpdateUser = conn.prepareStatement(updateUser);
+                psUpdateUser.setInt(1, userId);
+                psUpdateUser.executeUpdate();
 
                 // Eğer ceza varsa ve ödenmişe (Ödeme Yapıldı Butonu ile) geldiyse kaydet
                 if (fineAmount > 0) {
