@@ -24,7 +24,7 @@ public class LoanDAO {
 
             if (rs.next() && rs.getInt("stock") > 0) {
                 // 2. ADIM: Loans tablosuna kaydet
-                String insertLoan = "INSERT INTO loans (user_id, book_id, loan_date, due_date, status) VALUES (?, ?, ?, ?, 'Aktif')";
+                String insertLoan = "INSERT INTO loans (user_id, book_id, loan_date, due_date, status) VALUES (?, ?, ?, ?, 'Ödünç Verildi')";
                 PreparedStatement psLoan = conn.prepareStatement(insertLoan);
 
                 // --- FACTORY PATTERN BURADA DEVREYE GİRİYOR! ---
@@ -63,7 +63,7 @@ public class LoanDAO {
 
     // 2. Ceza Sorgulama (İade İşleminden Önce)
     public double getPendingFineAmount(int userId, int bookId) {
-        String sql = "SELECT due_date FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Aktif'";
+        String sql = "SELECT due_date FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Ödünç Verildi'";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -94,7 +94,7 @@ public class LoanDAO {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            String findLoan = "SELECT id FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Aktif'";
+            String findLoan = "SELECT id FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Ödünç Verildi'";
             PreparedStatement psFind = conn.prepareStatement(findLoan);
             psFind.setInt(1, userId);
             psFind.setInt(2, bookId);

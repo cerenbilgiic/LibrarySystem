@@ -17,6 +17,10 @@ public class LibrarySystemUI extends JFrame {
     private JComboBox<String> selectCategory;
     private JTextField txtEmployeeName, txtEmployeeSurname , txtEmployeeTC, txtEmployeePass,txtEmployeeId;
 
+    JTextField txtBorrowDate = new JTextField(10);
+    JTextField txtDueDate = new JTextField(10);
+    JTextField txtReturnDate = new JTextField(10);
+
     JTextField txtBookAuthorName;
     JTextField txtBookAuthorSurname;
 
@@ -43,37 +47,35 @@ public class LibrarySystemUI extends JFrame {
     }
 
     private void initUI() {
-        setTitle("SafeHaven | Kütüphane Otomasyon Sistemi");
+        setTitle("Kütüphane Otomasyon Sistemi");
         setSize(1100, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // --- 1. CARDLAYOUT VE ANA PANEL HAZIRLIĞI ---
-        // CRITICAL: Önce layout nesnesi oluşturulmalı!
+        // ANA PANEL HAZIRLIĞI
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setBackground(Color.WHITE);
 
-        // --- 2. WELCOME PANELİ ---
         JPanel pnlWelcome = new JPanel(new BorderLayout(20, 20));
         pnlWelcome.setBackground(new Color(245, 245, 250));
         pnlWelcome.setBorder(new EmptyBorder(40, 40, 40, 40));
 
-        // Üst Kısım - Hoşgeldin Mesajı
+        // Hoşgeldin Mesajı
         JLabel lblWelcome = new JLabel("<html><div style='text-align: center; border-bottom: 2px solid #0984e3; padding-bottom: 10px;'>"
-                + "<h1 style='color: #2d3436; font-family: Segoe UI, sans-serif; margin-bottom: 5px;'>KÜTÜPHANE VERİ MERKEZİ</h1>"
+                + "<h1 style='color: #2d3436; font-family: Segoe UI, sans-serif; margin-bottom: 5px;'>KÜTÜPHANE YÖNETİM SİSTEMİNE HOŞ GELDİNİZ</h1>"
                 + "<h2 style='color: #0984e3; font-family: Segoe UI, sans-serif;'>Giriş Yapan: " + loggedUserName.toUpperCase() + "</h2>"
                 + "</div></html>", SwingConstants.CENTER);
         pnlWelcome.add(lblWelcome, BorderLayout.NORTH);
 
-        // İstatistik Paneli (Orta Kısım)
+        // İstatistik Paneli
         JPanel statsPanel = new JPanel(new GridLayout(2, 2, 25, 25));
         statsPanel.setOpaque(false);
 
         statsPanel.add(createStatCard("Toplam Kitap", String.valueOf(bookDAO.getTotalBookCount()), "📚", new Color(52, 152, 219)));
         statsPanel.add(createStatCard("Toplam Yazar", String.valueOf(authorDAO.getTotalAuthorCount()), "✍️", new Color(155, 89, 182)));
         statsPanel.add(createStatCard("Toplam Üye", String.valueOf(memberDAO.getTotalMemberCount()), "👥", new Color(46, 204, 113)));
-        statsPanel.add(createStatCard("Çalışanlar", String.valueOf(employeeDAO.getTotalEmployeeCount()), "👨‍💼", new Color(230, 126, 34)));
+        statsPanel.add(createStatCard("Toplam Çalışam", String.valueOf(employeeDAO.getTotalEmployeeCount()), "👨‍💼", new Color(230, 126, 34)));
 
         pnlWelcome.add(statsPanel, BorderLayout.CENTER);
 
@@ -174,6 +176,29 @@ public class LibrarySystemUI extends JFrame {
         JButton btnAdd = new JButton("Üye Ekle");
         btnAdd.setBackground(new Color(116, 185, 255));
         btnAdd.addActionListener(e -> {
+            String tc= txtMemberTC.getText().trim();
+            String memberName = txtMemberName.getText().trim();
+            String memberSurnamec= txtMemberSurname.getText().trim();
+
+            if (tc.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "TC Kimlik No boş olamaz!");
+                return;
+            }
+
+            if (tc.length() != 11) {
+                JOptionPane.showMessageDialog(this, "Hata: TC Kimlik No tam olarak 11 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (bookDAO.isIsbnExists(tc)) {
+                JOptionPane.showMessageDialog(this,
+                        "Bu TC Kimlik No zaten kayıtlı!",
+                        "Hata",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+
             if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberTC.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
 
@@ -582,83 +607,120 @@ try {
     }
 
     private JPanel createLoanPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50));
-        panel.setBorder(BorderFactory.createTitledBorder("Ödünç Verme & İade İşlemleri"));
-        JTextField txtMemberTC = new JTextField(15);
-        JTextField txtIsbnInput = new JTextField(15);
-        
-        JButton btnBorrow = new JButton("Ödünç Ver");
+        // Ana panel - Üst ve Alt panelleri dikey olarak ikiye böler
+        JPanel panel = new JPanel(new GridLayout(2, 1, 0, 10));
+        panel.setBackground(Color.WHITE);
+
+        // --- 1. ÜST PANEL: ÖDÜNÇ VERME SİSTEMİ ---
+        JPanel borrowPanel = new JPanel(new GridBagLayout());
+        borrowPanel.setBorder(BorderFactory.createTitledBorder("KİTAP ÖDÜNÇ VERME"));
+        GridBagConstraints gbcB = new GridBagConstraints();
+        gbcB.insets = new Insets(5, 5, 5, 5);
+        gbcB.fill = GridBagConstraints.HORIZONTAL;
+
+        JTextField txtBorrow_MemberTC = new JTextField(15);
+        JTextField txtBorrow_IsbnInput = new JTextField(15);
+        JTextField txtBorrow_BorrowDate = new JTextField(LocalDate.now().toString());
+        JTextField txtBorrow_DueDate = new JTextField(LocalDate.now().plusDays(15).toString());
+        txtBorrow_BorrowDate.setEditable(false);
+        txtBorrow_DueDate.setEditable(false);
+
+        addComponent(borrowPanel, new JLabel("Üye TC:"), 0, 0, gbcB);
+        addComponent(borrowPanel, txtBorrow_MemberTC, 1, 0, gbcB);
+        addComponent(borrowPanel, new JLabel("Kitap ISBN:"), 0, 1, gbcB);
+        addComponent(borrowPanel, txtBorrow_IsbnInput, 1, 1, gbcB);
+        addComponent(borrowPanel, new JLabel("Ödünç Tarihi:"), 0, 2, gbcB);
+        addComponent(borrowPanel, txtBorrow_BorrowDate, 1, 2, gbcB);
+        addComponent(borrowPanel, new JLabel("Teslim Tarihi:"), 0, 3, gbcB);
+        addComponent(borrowPanel, txtBorrow_DueDate, 1, 3, gbcB);
+
+        JButton btnBorrow = new JButton("Ödünç İşlemini Tamamla");
         btnBorrow.setBackground(new Color(116, 185, 255));
-        
-        JButton btnReturn = new JButton("İade Al");
-        btnReturn.setBackground(new Color(116, 185, 255));
-        
-        panel.add(new JLabel("Üye TC:"));
-        panel.add(txtMemberTC);
-        panel.add(new JLabel("Kitap ISBN:"));
-        panel.add(txtIsbnInput);
-        panel.add(btnBorrow);
-        panel.add(btnReturn);
-        
+        btnBorrow.setBackground(new Color(116, 185, 255));
         btnBorrow.addActionListener(e -> {
             try {
-                String tc = txtMemberTC.getText().trim();
-                String bIsbn = txtIsbnInput.getText().trim();
-                if (tc.isEmpty() || bIsbn.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Lütfen TC ve Kitap ISBN giriniz!");
+                String tc = txtBorrow_MemberTC.getText().trim();
+                String Isbn = txtBorrow_IsbnInput.getText().trim();
+                if (tc.isEmpty() || Isbn.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Lütfen TC Kimlik No ve Kitap ISBN giriniz!");
                     return;
                 }
-                
+
                 member m = memberDAO.getMemberByTC(tc);
                 if (m == null) {
                     JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz TC Kimlik Numarası)!");
                     return;
                 }
-                
-                books b = bookDAO.getBookByIsbn(bIsbn);
+
+                books b = bookDAO.getBookByIsbn(Isbn);
                 if (b == null) {
                     JOptionPane.showMessageDialog(this, "Kitap bulunamadı (Geçersiz ISBN)!");
                     return;
                 }
-                
+
                 if (loanDAO.issueLoan(m.getId(), b.getId())) {
                     JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
-                    txtMemberTC.setText("");
-                    txtIsbnInput.setText("");
-                } else {
+                    txtBorrow_MemberTC.setText("");
+                    txtBorrow_IsbnInput.setText("");
+
+                }
+                else {
                     JOptionPane.showMessageDialog(this, "İşlem başarısız! Kitap stokta olmayabilir.");
                 }
             } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Bir hata oluştu: " + ex.getMessage()); }
         });
+        addComponent(borrowPanel, btnBorrow, 1, 4, gbcB);
 
+
+        //iade alma işlemi.
+
+        JPanel returnPanel = new JPanel(new GridBagLayout());
+        returnPanel.setBorder(BorderFactory.createTitledBorder("KİTAP İADE ALMA"));
+        GridBagConstraints gbcR = new GridBagConstraints();
+        gbcR.insets = new Insets(5, 5, 5, 5);
+        gbcR.fill = GridBagConstraints.HORIZONTAL;
+
+        JTextField txtR_MemberTC = new JTextField(15);
+        JTextField txtR_IsbnInput = new JTextField(15);
+        JTextField txtR_ReturnDate = new JTextField(LocalDate.now().toString());
+        txtR_ReturnDate.setEditable(false);
+
+        addComponent(returnPanel, new JLabel("Üye TC:"), 0, 0, gbcR);
+        addComponent(returnPanel, txtR_MemberTC, 1, 0, gbcR);
+        addComponent(returnPanel, new JLabel("Kitap ISBN:"), 0, 1, gbcR);
+        addComponent(returnPanel, txtR_IsbnInput, 1, 1, gbcR);
+        addComponent(returnPanel, new JLabel("İade Alınan Tarih:"), 0, 2, gbcR);
+        addComponent(returnPanel, txtR_ReturnDate, 1, 2, gbcR);
+
+        JButton btnReturn = new JButton("İade İşlemini Tamamla");
         btnReturn.addActionListener(e -> {
             try {
-                String tc = txtMemberTC.getText().trim();
-                String bIsbn = txtIsbnInput.getText().trim();
+                String tc = txtR_MemberTC.getText().trim();
+                String bIsbn = txtR_IsbnInput.getText().trim();
                 if (tc.isEmpty() || bIsbn.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Lütfen TC Kimlik ve Kitap ISBN giriniz!");
                     return;
                 }
-                
+
                 member m = memberDAO.getMemberByTC(tc);
                 if (m == null) {
                     JOptionPane.showMessageDialog(this, "Üye bulunamadı (Geçersiz TC Kimlik Numarası)!");
                     return;
                 }
-                
+
                 books b = bookDAO.getBookByIsbn(bIsbn);
                 if (b == null) {
                     JOptionPane.showMessageDialog(this, "Kitap bulunamadı (Geçersiz ISBN)!");
                     return;
                 }
-                
+
                 double pendingFine = loanDAO.getPendingFineAmount(m.getId(), b.getId());
-                
+
                 if (pendingFine == -1.0) {
                     JOptionPane.showMessageDialog(this, "Aktif bir ödünç kaydı bulunamadı veya hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                
+
                 if (pendingFine > 0) {
                     Object[] options = {"Ödeme Yapıldı İade Al", "Tamam"};
                     int secim = JOptionPane.showOptionDialog(this,
@@ -669,12 +731,12 @@ try {
                             null,
                             options,
                             options[0]);
-                            
+
                     if (secim == 0) { // Ödeme yapıldı iade al tıklandı
                         if (loanDAO.processReturn(m.getId(), b.getId(), pendingFine)) {
                             JOptionPane.showMessageDialog(this, "İade işlemi ve ceza tahsilatı başarıyla tamamlandı!");
-                            txtMemberTC.setText("");
-                            txtIsbnInput.setText("");
+                            txtR_MemberTC.setText("");
+                            txtR_IsbnInput.setText("");
                         } else {
                             JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                         }
@@ -685,15 +747,19 @@ try {
                     // Ceza yoksa doğrudan iade edilir
                     if (loanDAO.processReturn(m.getId(), b.getId(), 0.0)) {
                         JOptionPane.showMessageDialog(this, "İade işlemi başarıyla tamamlandı!\nHerhangi bir ceza bulunmuyor.");
-                        txtMemberTC.setText("");
-                        txtIsbnInput.setText("");
+                        txtR_MemberTC.setText("");
+                        txtR_IsbnInput.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Bir hata oluştu: " + ex.getMessage()); }
         });
-        
+        addComponent(returnPanel, btnReturn, 1, 3, gbcR);
+
+        panel.add(borrowPanel);
+        panel.add(returnPanel);
+
         return panel;
     }
 
