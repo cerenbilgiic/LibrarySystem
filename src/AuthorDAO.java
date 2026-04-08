@@ -7,6 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuthorDAO {
+    public boolean isAuthorNameExists(String AuthorName) {
+        String sql = "SELECT COUNT(*) FROM authors WHERE author_name = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, AuthorName);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     // 1. Veritabanına Yeni Yazar Ekleme İşlemi (CREATE)
     public boolean addAuthor(String authorName, String authorSurname, String biography) {

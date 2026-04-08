@@ -86,19 +86,42 @@ public class BookDAO {
 
     //kitap silme
     public boolean deleteBook(int bookId) {
-        // Veritabanından ID'ye göre silen SQL sorgusu
-        String sql = "DELETE FROM books WHERE id = ?";
+        Connection conn = null;
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
 
-            pstmt.setInt(1, bookId);
+            // 1. Aktif loan kontrolü
+            String checkSql = "SELECT COUNT(*) FROM loans WHERE book_id = ? AND status != 'iade edildi'";
+            PreparedStatement psCheck = conn.prepareStatement(checkSql);
+            psCheck.setInt(1, bookId);
+            ResultSet rs = psCheck.executeQuery();
 
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("Kitap hala ödünçte, silinemez!");
+                return false;
+            }
 
-        } catch (SQLException e) {
-            System.out.println("Silme hatası: " + e.getMessage());
+            // 2. fines sil (önce bu!)
+            String deleteFines = "DELETE FROM fines WHERE loan_id IN (SELECT id FROM loans WHERE book_id = ?)";
+            PreparedStatement psFines = conn.prepareStatement(deleteFines);
+            psFines.setInt(1, bookId);
+            psFines.executeUpdate();
+
+            // 3. loans sil
+            String deleteLoans = "DELETE FROM loans WHERE book_id = ?";
+            PreparedStatement psLoans = conn.prepareStatement(deleteLoans);
+            psLoans.setInt(1, bookId);
+            psLoans.executeUpdate();
+
+            // 4. book sil
+            String deleteBook = "DELETE FROM books WHERE id = ?";
+            PreparedStatement psBook = conn.prepareStatement(deleteBook);
+            psBook.setInt(1, bookId);
+
+            return psBook.executeUpdate() > 0;
+
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

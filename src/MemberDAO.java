@@ -20,7 +20,7 @@ public class MemberDAO {
         }
         return false;
     }
-    public boolean addMember(String first_name , String last_name ,String tc ) {
+    public boolean addMember(String first_name , String last_name ,String tc  ) {
         String sql = "INSERT INTO users (first_name , last_name , tc, role) VALUES (?, ?, ?, 'KÜTÜPHANE ÜYESİ')";
 
         try (Connection conn = DBConnection.getConnection();
