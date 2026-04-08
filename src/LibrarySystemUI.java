@@ -55,16 +55,33 @@ public class LibrarySystemUI extends JFrame {
         cardPanel.setBackground(Color.WHITE);
 
         // --- 2. WELCOME PANELİ ---
-        JPanel pnlWelcome = new JPanel(new GridBagLayout());
-        pnlWelcome.setBackground(Color.WHITE);
+        JPanel pnlWelcome = new JPanel(new BorderLayout(20, 20));
+        pnlWelcome.setBackground(new Color(245, 245, 250));
+        pnlWelcome.setBorder(new EmptyBorder(40, 40, 40, 40));
 
-        // HATA DÜZELTME: txtMemberName.getText() yerine constructor'dan gelen loggedUserName kullanıldı.
-        JLabel lblWelcome = new JLabel("<html><div style='text-align: center;'>"
-                + "<h1 style='color: #2d3436; font-family: sans-serif;'>KÜTÜPHANE SİSTEMİNE HOŞ GELDİN</h1>"
-                + "<h2 style='color: #0984e3; font-family: sans-serif;'>" + loggedUserName.toUpperCase() + "</h2>"
-                + "<p style='color: #636e72; margin-top: 20px;'>Lütfen soldaki menüden işlem seçiniz.</p>"
-                + "</div></html>");
-        pnlWelcome.add(lblWelcome);
+        // Üst Kısım - Hoşgeldin Mesajı
+        JLabel lblWelcome = new JLabel("<html><div style='text-align: center; border-bottom: 2px solid #0984e3; padding-bottom: 10px;'>"
+                + "<h1 style='color: #2d3436; font-family: Segoe UI, sans-serif; margin-bottom: 5px;'>KÜTÜPHANE VERİ MERKEZİ</h1>"
+                + "<h2 style='color: #0984e3; font-family: Segoe UI, sans-serif;'>Giriş Yapan: " + loggedUserName.toUpperCase() + "</h2>"
+                + "</div></html>", SwingConstants.CENTER);
+        pnlWelcome.add(lblWelcome, BorderLayout.NORTH);
+
+        // İstatistik Paneli (Orta Kısım)
+        JPanel statsPanel = new JPanel(new GridLayout(2, 2, 25, 25));
+        statsPanel.setOpaque(false);
+
+        statsPanel.add(createStatCard("Toplam Kitap", String.valueOf(bookDAO.getTotalBookCount()), "📚", new Color(52, 152, 219)));
+        statsPanel.add(createStatCard("Toplam Yazar", String.valueOf(authorDAO.getTotalAuthorCount()), "✍️", new Color(155, 89, 182)));
+        statsPanel.add(createStatCard("Toplam Üye", String.valueOf(memberDAO.getTotalMemberCount()), "👥", new Color(46, 204, 113)));
+        statsPanel.add(createStatCard("Çalışanlar", String.valueOf(employeeDAO.getTotalEmployeeCount()), "👨‍💼", new Color(230, 126, 34)));
+
+        pnlWelcome.add(statsPanel, BorderLayout.CENTER);
+
+        // Alt Kısım - Açıklama
+        JLabel lblHint = new JLabel("Lütfen sol menüden yapmak istediğiniz işlemi seçiniz.", SwingConstants.CENTER);
+        lblHint.setFont(new Font("Segoe UI", Font.ITALIC, 14));
+        lblHint.setForeground(new Color(108, 117, 125));
+        pnlWelcome.add(lblHint, BorderLayout.SOUTH);
 
        //CARDPANELE PANELLERİ EKLEME
         cardPanel.add(pnlWelcome, "pnlWelcome");
@@ -1010,8 +1027,40 @@ try {
     }
 
 
-    private void addComponent(JPanel p, Component c, int x, int y, GridBagConstraints gbc) {
-        gbc.gridx = x; gbc.gridy = y;
-        p.add(c, gbc);
+    private void addComponent(JPanel panel, Component comp, int x, int y, GridBagConstraints gbc) {
+        gbc.gridx = x;
+        gbc.gridy = y;
+        panel.add(comp, gbc);
+    }
+
+    private JPanel createStatCard(String title, String value, String icon, Color color) {
+        JPanel card = new JPanel(new BorderLayout(15, 10));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 8, 0, 0, color),
+                new EmptyBorder(25, 25, 25, 25)
+        ));
+
+        JLabel lblIcon = new JLabel(icon);
+        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 45));
+        lblIcon.setForeground(color);
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        lblTitle.setForeground(new Color(127, 140, 141));
+
+        JLabel lblValue = new JLabel(value);
+        lblValue.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lblValue.setForeground(new Color(44, 62, 80));
+
+        JPanel textPanel = new JPanel(new GridLayout(2, 1));
+        textPanel.setOpaque(false);
+        textPanel.add(lblTitle);
+        textPanel.add(lblValue);
+
+        card.add(lblIcon, BorderLayout.WEST);
+        card.add(textPanel, BorderLayout.CENTER);
+
+        return card;
     }
 }

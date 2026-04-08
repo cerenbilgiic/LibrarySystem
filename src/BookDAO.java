@@ -104,6 +104,16 @@ public class BookDAO {
         }
     }
 
+    public int getTotalBookCount() {
+        String sql = "SELECT COUNT(*) FROM books";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
     public books getBookByIsbn(String isbn) {
         String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
                 "b.author_id, b.category_id, b.stock, " +

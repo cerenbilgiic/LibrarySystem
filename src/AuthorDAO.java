@@ -122,4 +122,14 @@ public class AuthorDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return null; // Yazar yoksa boş (null) döner
     }
+
+    public int getTotalAuthorCount() {
+        String sql = "SELECT COUNT(*) FROM authors";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
 }
