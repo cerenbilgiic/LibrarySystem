@@ -5,8 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 public class CategoryDAO {
-
-    // 1. Yeni Kategori Ekleme
+    //Kategori Ekleme
     public boolean addCategory(String categoryName, String description) {
         String sql = "INSERT INTO categories (category_name, description) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection();
@@ -20,7 +19,7 @@ public class CategoryDAO {
         }
     }
 
-    // 2. Kategori Güncelleme (Hata veren eksik metot buydu!)
+    // 2. Kategori Güncelleme
     public boolean updateCategory(int id, String name, String description) {
         String sql = "UPDATE categories SET category_name = ?, description = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();

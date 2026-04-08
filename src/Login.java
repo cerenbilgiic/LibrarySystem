@@ -13,7 +13,6 @@ public class Login extends JFrame {
         setLocationRelativeTo(null); // Ekranın ortasında açılır
         setLayout(new GridLayout(3, 2, 10, 10));
 
-        // Bileşenleri ekleyelim
         add(new JLabel(" TC Kimlik No:"));
         txtEmployeeTC = new JTextField();
         add(txtEmployeeTC);
@@ -27,7 +26,6 @@ public class Login extends JFrame {
         add(btnLogin);
         btnLogin.addActionListener(e -> {
             String tc = txtEmployeeTC.getText();
-            // (Güvenlik kısmında ufak bir düzenleme: getPassword() kullanımı string'e doğru çevrilmelidir)
             String password = new String(txtPassword.getPassword());
 
             if (tc.isEmpty() || password.isEmpty()) {
@@ -40,12 +38,10 @@ public class Login extends JFrame {
             if (dao.checkLogin(tc, password)) {
                 JOptionPane.showMessageDialog(this, "Giriş Başarılı!");
 
-                // 1- Veritabanına gidip kişinin adını ve soyadını soruyoruz
+                //veri tabanından kişinin adı ve soyadı alınır, giriş ekranına yansıtılmak için.
                 String adSoyad = dao.getUserFullName(tc);
 
                 this.dispose();
-
-                // 2- Boş kurucu yerine ANA EKRANA ismini parametre olarak gönderdiğimiz yeni kurucuyu çalıştırıyoruz:
                 new LibrarySystemUI(adSoyad).setVisible(true);
 
             } else {

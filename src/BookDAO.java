@@ -31,7 +31,7 @@ public class BookDAO {
             pstmt.setString(2, book.getBook_name()); // Java nesnesinden adı alıyoruz
             pstmt.setObject(3, book.getPurchase_date()); // Java nesnesinden tarihi alıyoruz
             pstmt.setInt(4, book.getAuthorId());
-            pstmt.setString(5, book.getCategory_name());
+            pstmt.setInt(5, book.getCategoryId());
             pstmt.setInt(6,book.getStock());
 
             return pstmt.executeUpdate() > 0;
@@ -113,7 +113,7 @@ public class BookDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
     }
-
+    //kitap arama.
     public books getBookByIsbn(String isbn) {
         String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
                 "b.author_id, b.category_id, b.stock, " +

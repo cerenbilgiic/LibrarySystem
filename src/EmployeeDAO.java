@@ -4,6 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDAO {
+    public boolean isTcExists(String tc) {
+        String sql = "SELECT COUNT(*) FROM users WHERE tc = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, tc);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     // ÇALIŞAN EKLEME
     public boolean addEmployee(String first_name , String last_name ,String tc ,String password) {
         String sql = "INSERT INTO users (first_name , last_name , tc , password, role) VALUES (?, ?, ?, ?, 'KÜTÜPHANE ÇALIŞANI')";
@@ -54,7 +70,6 @@ public class EmployeeDAO {
     }
 
     //çalışan silme işlemi.
-
     public boolean DeleteEmployee(int id ) {
         String sql = "DELETE FROM users WHERE id = ?";
 

@@ -4,6 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberDAO {
+    public boolean isTcExists(String tc) {
+        String sql = "SELECT COUNT(*) FROM users WHERE tc = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, tc);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     public boolean addMember(String first_name , String last_name ,String tc ) {
         String sql = "INSERT INTO users (first_name , last_name , tc, role) VALUES (?, ?, ?, 'KÜTÜPHANE ÜYESİ')";
 
@@ -21,7 +37,7 @@ public class MemberDAO {
         }
     }
 
-    // username üzerinden üye arama işlemi
+    // tc kimlik no üzerinden üye arama işlemi
     public member getMemberByTC(String tc) {
         String sql = "SELECT * FROM users WHERE tc = ?";
         try (Connection conn = DBConnection.getConnection();

@@ -8,8 +8,6 @@ public class LibrarySystemUI extends JFrame {
 
     private JPanel cardPanel;
     private CardLayout cardLayout;
-
-    // Form alanları
     private JTextField txtMemberName, txtMemberSurname, txtMemberTC;
     private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography;
     private JTextField txtMemberId, txtBookId,txtCategoryId, txtAuthorId, txtCatNameIn , txtStock;
@@ -24,7 +22,6 @@ public class LibrarySystemUI extends JFrame {
     JTextField txtBookAuthorName;
     JTextField txtBookAuthorSurname;
 
-    // DAO - (Dosyaların projesinde mevcut olduğu varsayılıyor)
     private LoanDAO loanDAO = new LoanDAO();
     private MemberDAO memberDAO = new MemberDAO();
     private BookDAO bookDAO = new BookDAO();
@@ -32,16 +29,12 @@ public class LibrarySystemUI extends JFrame {
     private CategoryDAO categoryDAO = new CategoryDAO();
     private EmployeeDAO employeeDAO = new EmployeeDAO();
 
-    private String loggedUserName = "";
+    private String loggedTC = "";
 
-
-    // Giriş sonrası çalışan Constructor
     public LibrarySystemUI(String name) {
-        this.loggedUserName = name;
+        this.loggedTC = name;
         initUI();
     }
-
-    // Direkt çalıştırma için varsayılan Constructor
     public LibrarySystemUI() {
         initUI();
     }
@@ -52,7 +45,6 @@ public class LibrarySystemUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // ANA PANEL HAZIRLIĞI
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setBackground(Color.WHITE);
@@ -61,31 +53,29 @@ public class LibrarySystemUI extends JFrame {
         pnlWelcome.setBackground(new Color(245, 245, 250));
         pnlWelcome.setBorder(new EmptyBorder(40, 40, 40, 40));
 
-        // Hoşgeldin Mesajı
+        // hoşgeldin mesajı
         JLabel lblWelcome = new JLabel("<html><div style='text-align: center; border-bottom: 2px solid #0984e3; padding-bottom: 10px;'>"
                 + "<h1 style='color: #2d3436; font-family: Segoe UI, sans-serif; margin-bottom: 5px;'>KÜTÜPHANE YÖNETİM SİSTEMİNE HOŞ GELDİNİZ</h1>"
-                + "<h2 style='color: #0984e3; font-family: Segoe UI, sans-serif;'>Giriş Yapan: " + loggedUserName.toUpperCase() + "</h2>"
+                + "<h2 style='color: #0984e3; font-family: Segoe UI, sans-serif;'>Giriş Yapan: " + loggedTC.toUpperCase() + "</h2>"
                 + "</div></html>", SwingConstants.CENTER);
         pnlWelcome.add(lblWelcome, BorderLayout.NORTH);
 
-        // İstatistik Paneli
+        // güncel veri paneli
         JPanel statsPanel = new JPanel(new GridLayout(2, 2, 25, 25));
         statsPanel.setOpaque(false);
 
         statsPanel.add(createStatCard("Toplam Kitap", String.valueOf(bookDAO.getTotalBookCount()), "📚", new Color(52, 152, 219)));
         statsPanel.add(createStatCard("Toplam Yazar", String.valueOf(authorDAO.getTotalAuthorCount()), "✍️", new Color(155, 89, 182)));
         statsPanel.add(createStatCard("Toplam Üye", String.valueOf(memberDAO.getTotalMemberCount()), "👥", new Color(46, 204, 113)));
-        statsPanel.add(createStatCard("Toplam Çalışam", String.valueOf(employeeDAO.getTotalEmployeeCount()), "👨‍💼", new Color(230, 126, 34)));
+        statsPanel.add(createStatCard("Toplam Çalışan", String.valueOf(employeeDAO.getTotalEmployeeCount()), "👨‍💼", new Color(230, 126, 34)));
 
         pnlWelcome.add(statsPanel, BorderLayout.CENTER);
 
-        // Alt Kısım - Açıklama
         JLabel lblHint = new JLabel("Lütfen sol menüden yapmak istediğiniz işlemi seçiniz.", SwingConstants.CENTER);
         lblHint.setFont(new Font("Segoe UI", Font.ITALIC, 14));
         lblHint.setForeground(new Color(108, 117, 125));
         pnlWelcome.add(lblHint, BorderLayout.SOUTH);
 
-       //CARDPANELE PANELLERİ EKLEME
         cardPanel.add(pnlWelcome, "pnlWelcome");
         cardPanel.add(createMemberPanel(), "pnlMember");
         cardPanel.add(createBookPanel(), "pnlBook");
@@ -93,7 +83,7 @@ public class LibrarySystemUI extends JFrame {
         cardPanel.add(createAuthorPanel(), "pnlAuthor");
         cardPanel.add(createEmployeePanel(),"pnlEmployee");
 
-        // --- 4. SIDEBAR (SOL MENÜ) ---
+        //sidebar
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(new Color(45, 52, 54));
@@ -109,18 +99,23 @@ public class LibrarySystemUI extends JFrame {
 
         sidebar.add(createMenuButton("Ana Sayfa", "pnlWelcome"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
         sidebar.add(createMenuButton("Üye İşlemleri", "pnlMember"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
         sidebar.add(createMenuButton("Kitap İşlemleri", "pnlBook"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
         sidebar.add(createMenuButton("Ödünç / İade", "pnlLoan"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
         sidebar.add(createMenuButton("Yazar İşlemleri", "pnlAuthor"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
         sidebar.add(createMenuButton("Çalışan İşlemleri" , "pnlEmployee"));
         sidebar.add(Box.createRigidArea(new Dimension(0,10)));
 
-        sidebar.add(Box.createVerticalGlue());
+        sidebar.add(Box.createVerticalGlue()); //daha orantılı boşluklar bırakmayı sağlar.
 
         JButton btnExit = new JButton("GÜVENLİ ÇIKIŞ");
         btnExit.setBackground(new Color(211, 47, 47));
@@ -129,14 +124,12 @@ public class LibrarySystemUI extends JFrame {
         btnExit.addActionListener(e -> System.exit(0));
         sidebar.add(btnExit);
 
-        // --- 5. ANA YERLEŞİM ---
         JPanel mainContainer = new JPanel(new BorderLayout());
         mainContainer.add(sidebar, BorderLayout.WEST);
         mainContainer.add(cardPanel, BorderLayout.CENTER);
 
         add(mainContainer);
 
-        // Başlangıç ekranını göster
         cardLayout.show(cardPanel, "pnlWelcome");
     }
 
@@ -152,10 +145,9 @@ public class LibrarySystemUI extends JFrame {
     //ÜYE İŞLEMLERİ
 
     //üye ekleme işlemi.
-
     private JPanel createMemberPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Üye Yönetim Sistemi"));
+        panel.setBorder(BorderFactory.createTitledBorder("ÜYE YÖNETİM SİSTEMİ"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -178,83 +170,66 @@ public class LibrarySystemUI extends JFrame {
         btnAdd.addActionListener(e -> {
             String tc= txtMemberTC.getText().trim();
             String memberName = txtMemberName.getText().trim();
-            String memberSurnamec= txtMemberSurname.getText().trim();
+            String memberSurname= txtMemberSurname.getText().trim();
 
-            if (tc.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "TC Kimlik No boş olamaz!");
-                return;
-            }
-
-            if (tc.length() != 11) {
-                JOptionPane.showMessageDialog(this, "Hata: TC Kimlik No tam olarak 11 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (bookDAO.isIsbnExists(tc)) {
+            if (memberName.isEmpty()) {JOptionPane.showMessageDialog(this, "Üye Adı boş olamaz!");return;}
+            if (memberSurname.isEmpty()) {JOptionPane.showMessageDialog(this, "Üye Soyadı boş olamaz!");return;}
+            if (tc.isEmpty()) {JOptionPane.showMessageDialog(this, "TC Kimlik No boş olamaz!");return;}
+            if (tc.length() != 11) {JOptionPane.showMessageDialog(this, "Hata: TC Kimlik No tam olarak 11 karakterden (haneden) oluşmalıdır!", "Geçersiz TC", JOptionPane.WARNING_MESSAGE);return;}
+            if (memberDAO.isTcExists(tc)) {
                 JOptionPane.showMessageDialog(this,
                         "Bu TC Kimlik No zaten kayıtlı!",
                         "Hata",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
-
             if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberTC.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
 
            txtMemberName.setText("");
            txtMemberSurname.setText("");
-            txtMemberTC.setText("");
+           txtMemberTC.setText("");
         });
         addComponent(panel, btnAdd, 1, 4, gbc);
 
         //Üye arama işlemi.
-
         JButton btnSearchMember = new JButton("Üye Ara");
         btnSearchMember.setBackground(new Color(116, 185, 255));
         btnSearchMember.addActionListener(e -> {
             String searchTC = JOptionPane.showInputDialog(this, "Üyenin TC Kimlik Numarasını Giriniz:");
             if (searchTC != null && !searchTC.trim().isEmpty()) {
-                try {
-                    member member = new MemberDAO().getMemberByTC(searchTC.trim());
-                    if (member != null) {
-                        JOptionPane.showMessageDialog(this, "Üye bulundu ve kutucuklara dolduruldu.");
-                        txtMemberName.setText(member.getFirst_name());
-                        txtMemberSurname.setText(member.getLast_name());
-                        txtMemberTC.setText(member.getTC());
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Böyle bir üye kaydı bulunamadı!");
-                    }
-                }
-                catch (Exception ex){
-                    JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
-                }
+            try {
+            member member = new MemberDAO().getMemberByTC(searchTC.trim());
+               if (member != null) {
+                 JOptionPane.showMessageDialog(this, "Üye bulundu ve kutucuklara dolduruldu.");
+                 txtMemberName.setText(member.getFirst_name());
+                 txtMemberSurname.setText(member.getLast_name());
+                 txtMemberTC.setText(member.getTC());
+               } else {JOptionPane.showMessageDialog(this, "Böyle bir üye kaydı bulunamadı!");}
+            }
+            catch (Exception ex){
+                JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());}
             }
         });
         addComponent(panel, btnSearchMember, 0, 4, gbc);
 
         //Üye silme işlemi.
-
         JButton btnDeleteMember = new JButton("Üye Sil");
         btnDeleteMember.setBackground(new Color(116,185,255));
 
         btnDeleteMember.addActionListener(e ->{
-
             String tc = txtMemberTC.getText().trim();
-
             if (tc.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lütfen silinecek üyeyi önce aratın!");
                 return;
             }
-
             int confirm = JOptionPane.showConfirmDialog(this,
                     txtMemberName.getText() + "  adlı üyeyi silmek istediğinize emin misiniz?",
                     "Silme Onayı", JOptionPane.YES_NO_OPTION);
-
             if (confirm == JOptionPane.YES_OPTION) {
                 member member = new MemberDAO().getMemberByTC(tc);
                 if (member != null) {
-                    boolean success = new MemberDAO().DeleteMember(member.getId());
+                     boolean success = new MemberDAO().DeleteMember(member.getId());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Üye başarıyla silindi!");
                         txtMemberName.setText("");
@@ -267,18 +242,17 @@ public class LibrarySystemUI extends JFrame {
             }
         } );
         addComponent(panel, btnDeleteMember, 2, 4, gbc);
-        //Üye düzenleme işlemi
 
+        //Üye düzenleme işlemi
         JButton btnupdateMember = new JButton("Üye Güncelle");
         btnupdateMember.setBackground(new Color(116, 185, 255));
         btnupdateMember.addActionListener(e -> {
-        String searchTC = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin Kullanıcı Adını Girin:");
+        String searchTC = JOptionPane.showInputDialog(this, "Düzenlenecek Üyenin TC Kimlik Numarasını Girin:");
 
         if (searchTC != null && !searchTC.trim().isEmpty()) {
         try {
         member exMember = new MemberDAO().getMemberByTC(searchTC.trim());
             if (exMember != null) {
-                // BURADA DEĞİŞKEN İSİMLERİNİN BAŞINA 'edit' EKLEDİK ÇAKIŞMAMASI İÇİN
                 JTextField editName = new JTextField(exMember.getFirst_name());
                 JTextField editSurname = new JTextField(exMember.getLast_name());
                 JTextField editTC = new JTextField(exMember.getTC());
@@ -290,7 +264,7 @@ public class LibrarySystemUI extends JFrame {
                 };
         int option = JOptionPane.showConfirmDialog(this, message, "Üye Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-try {
+    try {
     boolean success = new MemberDAO().updateMember(
     exMember.getId(),
     txtMemberName.getText(),
@@ -313,12 +287,10 @@ try {
     }
     });
     addComponent(panel, btnupdateMember, 1, 6, gbc);
-
     return panel;
     }
 
     //KİTAP İŞLEMLERİ
-
     private int getCategoryId(String category) {
         switch (category) {
             case "Roman": return 1;
@@ -337,14 +309,12 @@ try {
             case 3: return "Biyografi";
             case 4: return "Otobiyografi";
             case 5: return "Yazılım";
-            default: return "Roman";
+            default: return null;
         }
     }
-
-    //kitap ekleme işlemi
     private JPanel createBookPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Kitap Envanter Yönetimi"));
+        panel.setBorder(BorderFactory.createTitledBorder("KİTAP ENVANTER YÖNETİMİ"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -379,29 +349,24 @@ try {
         addComponent(panel, new JLabel("Kitap Stoğu: "), 0, 5, gbc);
         addComponent(panel, txtStock, 1, 5, gbc);
 
-        // Kaydet Butonu
+        //  kitap ekleme işlemi
         JButton btnAddBook = new JButton("Kitabı Kaydet");
         btnAddBook.setBackground(new Color(116, 185, 255));
 
         btnAddBook.addActionListener(e -> {
 
+            String bookname = txtBookName.getText().trim();
             String isbn = txtIsbn.getText().trim();
             String authorName = txtBookAuthorName.getText().trim();
             String authorSurname = txtBookAuthorSurname.getText().trim();
             String stockInput = txtStock.getText().trim();
             int stockAmount = stockInput.isEmpty() ? 1 : Integer.parseInt(stockInput);
 
-
-            if (isbn.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "ISBN boş olamaz!");
-                return;
-            }
-
-            if (isbn.length() != 13) {
-                JOptionPane.showMessageDialog(this, "Hata: ISBN tam olarak 13 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
+            if (bookname.isEmpty()) {JOptionPane.showMessageDialog(this, "Kitap Adı boş olamaz!");return;}
+            if (authorName.isEmpty()) {JOptionPane.showMessageDialog(this, "Yazar Adı boş olamaz!");return;}
+            if (authorSurname.isEmpty()) {JOptionPane.showMessageDialog(this, "Yazar Soyadı boş olamaz!");return;}
+            if (isbn.isEmpty()) {JOptionPane.showMessageDialog(this, "ISBN boş olamaz!");return;}
+            if (isbn.length() != 13) {JOptionPane.showMessageDialog(this, "Hata: ISBN tam olarak 13 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);return;}
             if (bookDAO.isIsbnExists(isbn)) {
                 JOptionPane.showMessageDialog(this,
                         "Bu ISBN zaten kayıtlı!",
@@ -409,9 +374,7 @@ try {
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             authors author = authorDAO.getAuthorByName(authorName, authorSurname);
-
             if (author == null) {
                 JOptionPane.showMessageDialog(this,
                         "Yazar bulunamadı!",
@@ -419,11 +382,9 @@ try {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             try {
                 String categoryName = (String) selectCategory.getSelectedItem();
                 int categoryId = getCategoryId(categoryName);
-
                 books book = new books(
                         0,
                         isbn,
@@ -434,11 +395,8 @@ try {
                         authorName,
                         authorSurname,
                         stockAmount
-
                 );
-
                 boolean sonuc = bookDAO.addBook(book);
-
                 if (sonuc) {
                     JOptionPane.showMessageDialog(this, "Kitap kaydedildi!");
 
@@ -514,6 +472,13 @@ try {
 
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Silindi!");
+
+                        txtIsbn.setText("");
+                        txtBookName.setText("");
+                        txtBookAuthorName.setText("");
+                        txtBookAuthorSurname.setText("");
+                        selectCategory.setSelectedIndex(0);
+                        txtStock.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "Silinemedi!");
                     }
@@ -524,14 +489,13 @@ try {
 
 
         //kitap düzenleme işlemi
-
         JButton btnupdateBook = new JButton("Kitap Güncelle");
         btnupdateBook.setBackground(new Color(116, 185, 255));
         btnupdateBook.addActionListener(e -> {
-            String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Kitap Adını Girin:");
+            String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Kitabın ISBN'sini Girin:");
 
             if (searchTitle != null && !searchTitle.trim().isEmpty()) {
-                books exBook = bookDAO.getBookByName(searchTitle.trim());
+                books exBook = bookDAO.getBookByIsbn(searchTitle.trim());
                 if (exBook != null) {
 
                     JTextField txtIsbnEdit = new JTextField(exBook.getIsbn());
@@ -574,7 +538,7 @@ try {
                             authors newAuthor = authorDAO.getAuthorByName(txtAuthNameEdit.getText().trim(), txtAuthSurnameEdit.getText().trim());
 
                             if (newAuthor == null) {
-                                JOptionPane.showMessageDialog(this, "Hata: Girdiğiniz kitap sistemde kayıtlı değil! Önce yazarı ekleyin.");
+                                JOptionPane.showMessageDialog(this, "Hata: Girdiğiniz kitap sistemde kayıtlı değil! Önce kitabı ekleyin.");
                                 return;
                             }
                             int newStockAmount = Integer.parseInt(txtStockEdit.getText().trim());
@@ -607,11 +571,11 @@ try {
     }
 
     private JPanel createLoanPanel() {
-        // Ana panel - Üst ve Alt panelleri dikey olarak ikiye böler
+        // panelleri dikey olarak ikiye böler
         JPanel panel = new JPanel(new GridLayout(2, 1, 0, 10));
         panel.setBackground(Color.WHITE);
 
-        // --- 1. ÜST PANEL: ÖDÜNÇ VERME SİSTEMİ ---
+        // ödünç verme işlemi
         JPanel borrowPanel = new JPanel(new GridBagLayout());
         borrowPanel.setBorder(BorderFactory.createTitledBorder("KİTAP ÖDÜNÇ VERME"));
         GridBagConstraints gbcB = new GridBagConstraints();
@@ -626,11 +590,14 @@ try {
         txtBorrow_DueDate.setEditable(false);
 
         addComponent(borrowPanel, new JLabel("Üye TC:"), 0, 0, gbcB);
-        addComponent(borrowPanel, txtBorrow_MemberTC, 1, 0, gbcB);
+        addComponent(borrowPanel, txtBorrow_MemberTC, 1, 0, gbcB)
+        ;
         addComponent(borrowPanel, new JLabel("Kitap ISBN:"), 0, 1, gbcB);
         addComponent(borrowPanel, txtBorrow_IsbnInput, 1, 1, gbcB);
+
         addComponent(borrowPanel, new JLabel("Ödünç Tarihi:"), 0, 2, gbcB);
         addComponent(borrowPanel, txtBorrow_BorrowDate, 1, 2, gbcB);
+
         addComponent(borrowPanel, new JLabel("Teslim Tarihi:"), 0, 3, gbcB);
         addComponent(borrowPanel, txtBorrow_DueDate, 1, 3, gbcB);
 
@@ -673,7 +640,6 @@ try {
 
 
         //iade alma işlemi.
-
         JPanel returnPanel = new JPanel(new GridBagLayout());
         returnPanel.setBorder(BorderFactory.createTitledBorder("KİTAP İADE ALMA"));
         GridBagConstraints gbcR = new GridBagConstraints();
@@ -687,8 +653,10 @@ try {
 
         addComponent(returnPanel, new JLabel("Üye TC:"), 0, 0, gbcR);
         addComponent(returnPanel, txtR_MemberTC, 1, 0, gbcR);
+
         addComponent(returnPanel, new JLabel("Kitap ISBN:"), 0, 1, gbcR);
         addComponent(returnPanel, txtR_IsbnInput, 1, 1, gbcR);
+
         addComponent(returnPanel, new JLabel("İade Alınan Tarih:"), 0, 2, gbcR);
         addComponent(returnPanel, txtR_ReturnDate, 1, 2, gbcR);
 
@@ -740,8 +708,7 @@ try {
                         } else {
                             JOptionPane.showMessageDialog(this, "İade sırasında bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                         }
-                    } else { // Tamam veya X tıklandı
-                        // İade durduruldu, hiçbir şey değişmez
+                    } else {
                     }
                 } else {
                     // Ceza yoksa doğrudan iade edilir
@@ -769,7 +736,7 @@ try {
     //yazar ekleme işlemi
     private JPanel createAuthorPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Yazar İşlemleri"));
+        panel.setBorder(BorderFactory.createTitledBorder("YAZAR İŞLEMLERİ"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -788,6 +755,18 @@ try {
         JButton btnAddAuthor = new JButton("Yazarı Kaydet");
         btnAddAuthor.setBackground(new Color(116, 185, 255));
         btnAddAuthor.addActionListener(e -> {
+
+            String authorName = txtAuthorName.getText().trim();
+            String authorSurname = txtAuthorSurname.getText().trim();
+
+            if (authorName.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Yazar Adı boş olamaz!");
+                return;
+            }
+            if (authorSurname.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Yazar Soyadı boş olamaz!");
+                return;
+            }
             try {
                 String name = txtAuthorName.getText();
                 String surname = txtAuthorSurname.getText();
@@ -808,7 +787,6 @@ try {
         addComponent(panel, btnAddAuthor, 1, 3, gbc);
 
         //Yazar arama işlemi.
-
         JButton btnSearchAuthor = new JButton("Yazar Ara");
         btnSearchAuthor.setBackground(new Color(116, 185, 255));
         btnSearchAuthor.addActionListener(e -> {
@@ -820,7 +798,6 @@ try {
 
                     String name = parts[0];
                     String surname = parts.length > 1 ? parts[1] : " ";
-
                     authors a = new AuthorDAO().getAuthorByName(name, surname);
 
                     if (a != null) {
@@ -841,7 +818,6 @@ try {
         addComponent(panel, btnSearchAuthor, 0, 3, gbc);
 
         //Yazar silme işlemi.
-
         JButton btnDeleteAuthor = new JButton("Yazar Sil");
         btnDeleteAuthor.setBackground(new Color(116,185,255));
 
@@ -878,49 +854,45 @@ try {
         addComponent(panel, btnDeleteAuthor, 2, 3, gbc);
 
         //Yazar düzenleme işlemi
-
         JButton btnupdateAuthor = new JButton("Yazar Güncelle");
         btnupdateAuthor.setBackground(new Color(116, 185, 255));
         btnupdateAuthor.addActionListener(e -> {
             String searchTitle = JOptionPane.showInputDialog(this, "Düzenlenecek Yazar Adını Girin:");
 
             if (searchTitle != null && !searchTitle.trim().isEmpty()) {
-                try {
-                    String[] parts = searchTitle.trim().split(" ");
-                    String name= parts[0];
-                    String surname = parts.length > 1 ? parts[1] : " ";
+            try {
+            String[] parts = searchTitle.trim().split(" ");
+            String name= parts[0];
+            String surname = parts.length > 1 ? parts[1] : " ";
+            authors exAuthor = new AuthorDAO().getAuthorByName(name,surname);
 
-                    authors exAuthor = new AuthorDAO().getAuthorByName(name,surname);
-
-                    if (exAuthor != null) {
-                        JTextField txtAuthorName = new JTextField(exAuthor.getAuthor_name());
-                        JTextField txtAuthorSurname  = new JTextField(exAuthor.getAuthor_surname());
-                        JTextField txtBiography = new JTextField(exAuthor.getBiography());
-
-                        Object[] message = {
-                                "Adı :", txtAuthorName,
-                                "Soyadı: ", txtAuthorSurname ,
-                                "Biyografi: ", txtBiography
+            if (exAuthor != null) {
+                JTextField txtAuthorName = new JTextField(exAuthor.getAuthor_name());
+                JTextField txtAuthorSurname  = new JTextField(exAuthor.getAuthor_surname());
+                JTextField txtBiography = new JTextField(exAuthor.getBiography());
+                Object[] message = {
+                        "Adı :", txtAuthorName,
+                        "Soyadı: ", txtAuthorSurname ,
+                        "Biyografi: ", txtBiography
                         };
 
-                        int option = JOptionPane.showConfirmDialog(this, message, "Yazar Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
-                        if (option == JOptionPane.OK_OPTION) {
-                            try {
-                                boolean success = new AuthorDAO().updateAuthor(
-                                        exAuthor.getId(),
-                                        txtAuthorName.getText(),
-                                        txtAuthorSurname.getText(),
-                                        txtBiography.getText()
-                                );
-
-                                if (success) {
-                                    JOptionPane.showMessageDialog(this, "Yazar başarıyla güncellendi!");
-                                } else {
-                                    JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
-                                }
-                            } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());
-                            }
+                int option = JOptionPane.showConfirmDialog(this, message, "Yazar Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    try {
+                        boolean success = new AuthorDAO().updateAuthor(
+                                exAuthor.getId(),
+                                txtAuthorName.getText(),
+                                txtAuthorSurname.getText(),
+                                txtBiography.getText()
+                        );
+                        if (success) {
+                            JOptionPane.showMessageDialog(this, "Yazar başarıyla güncellendi!");
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Güncelleme başarısız oldu!", "Hata", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this, "Teknik bir hata oluştu: " + ex.getMessage());
+                    }
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Yazar bulunamadı!");
@@ -937,10 +909,9 @@ try {
     //ÇALIŞAN İŞLEMLERİ
 
     //çalışan ekleme işlemi.
-
     private JPanel createEmployeePanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Çalışan Yönetim Sistemi"));
+        panel.setBorder(BorderFactory.createTitledBorder("ÇALIŞAN YÖNETİM SİSTEMİ"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -965,10 +936,27 @@ try {
             if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeTC.getText(), txtEmployeePass.getText()))
                 JOptionPane.showMessageDialog(this, "Çalışan başarıyla eklendi!");
 
+            txtEmployeeName.setText("");
+            txtEmployeeSurname.setText("");
+            txtEmployeeTC.setText("");
+            txtEmployeePass.setText("");
+
             String employeeName = txtEmployeeName.getText().trim();
             String employeeSurname = txtEmployeeSurname.getText().trim();
-            String employeeUsername = txtEmployeeTC.getText().trim();
+            String employeetc = txtEmployeeTC.getText().trim();
             String employeePassword = txtEmployeePass.getText().trim();
+            if (employeeName.isEmpty()) {JOptionPane.showMessageDialog(this, "Çalışan Adı boş olamaz!");return;}
+            if (employeeSurname.isEmpty()) {JOptionPane.showMessageDialog(this, "Çalışan Soyadı boş olamaz!");return;}
+            if (employeetc.isEmpty()) {JOptionPane.showMessageDialog(this, "TC Kimlik No boş olamaz!");return;}
+            if (employeetc.length() != 11) {JOptionPane.showMessageDialog(this, "Hata: TC Kimlik No tam olarak 11 karakterden (haneden) oluşmalıdır!", "Geçersiz TC", JOptionPane.WARNING_MESSAGE);return;}
+            if (employeePassword.isEmpty()) {JOptionPane.showMessageDialog(this, "Şifre boş olamaz!");return;}
+            if (employeeDAO.isTcExists(employeetc)) {
+                JOptionPane.showMessageDialog(this,
+                        "Bu TC Kimlik No zaten kayıtlı!",
+                        "Hata",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
         });
         addComponent(panel, btnAddEmployee, 1, 4, gbc);
 
