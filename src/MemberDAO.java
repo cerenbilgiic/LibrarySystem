@@ -5,7 +5,7 @@ import java.util.List;
 
 public class MemberDAO {
     public boolean addMember(String first_name , String last_name ,String tc ) {
-        String sql = "INSERT INTO users (first_name , last_name , tc, role) VALUES (?, ?, ?, 'Kütüphane Üyesi')";
+        String sql = "INSERT INTO users (first_name , last_name , tc, role) VALUES (?, ?, ?, 'KÜTÜPHANE ÜYESİ')";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -32,7 +32,7 @@ public class MemberDAO {
 
             if (rs.next()){
                 String role = rs.getString("role");
-                if (role == null || (!role.equalsIgnoreCase("Kütüphane Üyesi") && !role.equalsIgnoreCase("Üye"))) {
+                if (role == null || (!role.equalsIgnoreCase("KÜTÜPHANE ÜYESİ") && !role.equalsIgnoreCase("Üye"))) {
                     return null; // Yalnızca kütüphane üyeleri gelsin
                 }
 
@@ -98,8 +98,9 @@ public class MemberDAO {
         }
     }
 
+    //toplam üye sayısı
     public int getTotalMemberCount() {
-        String sql = "SELECT COUNT(*) FROM users WHERE role = 'Kütüphane Üyesi' OR role = 'Üye'";
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'KÜTÜPHANE ÜYESİ' OR role = 'Üye'";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

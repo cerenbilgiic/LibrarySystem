@@ -6,7 +6,7 @@ import java.util.List;
 public class EmployeeDAO {
     // ÇALIŞAN EKLEME
     public boolean addEmployee(String first_name , String last_name ,String tc ,String password) {
-        String sql = "INSERT INTO users (first_name , last_name , tc , password, role) VALUES (?, ?, ?, ?, 'Kütüphane Çalışanı')";
+        String sql = "INSERT INTO users (first_name , last_name , tc , password, role) VALUES (?, ?, ?, ?, 'KÜTÜPHANE ÇALIŞANI')";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -53,7 +53,7 @@ public class EmployeeDAO {
         return null;
     }
 
-    //üye silme işlemi.
+    //çalışan silme işlemi.
 
     public boolean DeleteEmployee(int id ) {
         String sql = "DELETE FROM users WHERE id = ?";
@@ -97,7 +97,7 @@ public class EmployeeDAO {
     }
 
     public int getTotalEmployeeCount() {
-        String sql = "SELECT COUNT(*) FROM users WHERE role = 'Kütüphane Çalışanı'";
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'KÜTÜPHANE ÇALIŞANI'";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
