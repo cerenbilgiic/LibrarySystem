@@ -101,7 +101,7 @@ public class BookDAO {
     //kitap arama.
     public books getBookByIsbn(String isbn) {
         String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
-                "b.author_id, b.category_id, b.stock, b.publisher, " +
+                "b.author_id, b.category_id, b.stock, b.publishier, " +
                 "a.author_name, a.author_surname, c.category_name " +
                 "FROM books b " +
                 "LEFT JOIN authors a ON b.author_id = a.id " +
@@ -151,8 +151,8 @@ public class BookDAO {
             pstmt.setInt(3, authorId);
             pstmt.setInt(4, categoryId);
             pstmt.setInt(5, stock);
-            pstmt.setInt(6, bookId);
-            pstmt.setString(7,publishier);
+            pstmt.setString(6, publishier);
+            pstmt.setInt(7, bookId);
 
             return pstmt.executeUpdate() > 0;
 

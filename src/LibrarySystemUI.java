@@ -1,7 +1,11 @@
+import javax.swing.Timer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.LocalDate;
+
 
 public class LibrarySystemUI extends JFrame {
 
@@ -14,6 +18,7 @@ public class LibrarySystemUI extends JFrame {
     private JButton btnSearchBook;
     private JComboBox<String> selectCategory;
     private JTextField txtEmployeeName, txtEmployeeSurname , txtEmployeeTC, txtEmployeePass,txtEmployeeId;
+    private JLabel lblClock;
 
     JTextField txtBorrowDate = new JTextField(10);
     JTextField txtDueDate = new JTextField(10);
@@ -21,6 +26,11 @@ public class LibrarySystemUI extends JFrame {
 
     JTextField txtBookAuthorName;
     JTextField txtBookAuthorSurname;
+
+    private JLabel lblTotalBooks;
+    private JLabel lblTotalAuthors;
+    private JLabel lblTotalMembers;
+    private JLabel lblTotalEmployees;
 
     private LoanDAO loanDAO = new LoanDAO();
     private MemberDAO memberDAO = new MemberDAO();
@@ -31,6 +41,18 @@ public class LibrarySystemUI extends JFrame {
 
     private String loggedTC = "";
 
+    public void startClock() {
+        Timer timer = new Timer(1000, e -> {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+
+            lblClock.setText( dtf.format(now));
+        });
+
+        // Zamanlayıcıyı başlatıyoruz
+        timer.start();
+    }
+
     public LibrarySystemUI(String name) {
         this.loggedTC = name;
         initUI();
@@ -40,6 +62,10 @@ public class LibrarySystemUI extends JFrame {
     }
 
     private void initUI() {
+        lblClock = new JLabel("Saat yükleniyor...");
+        lblClock.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+        lblClock.setHorizontalAlignment(SwingConstants.RIGHT);
+
         setTitle("Kütüphane Otomasyon Sistemi");
         setSize(1100, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -128,9 +154,18 @@ public class LibrarySystemUI extends JFrame {
         mainContainer.add(sidebar, BorderLayout.WEST);
         mainContainer.add(cardPanel, BorderLayout.CENTER);
 
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBorder(new EmptyBorder(5, 10, 5, 20));
+        headerPanel.add(lblClock);
+
+        mainContainer.add(headerPanel, BorderLayout.NORTH);
+
         add(mainContainer);
 
         cardLayout.show(cardPanel, "pnlWelcome");
+
+        startClock();
     }
 
     private JButton createMenuButton(String text, String cardName) {
@@ -186,6 +221,8 @@ public class LibrarySystemUI extends JFrame {
             if (memberDAO.addMember(txtMemberName.getText(), txtMemberSurname.getText(), txtMemberTC.getText()))
                 JOptionPane.showMessageDialog(this, "Üye başarıyla eklendi!");
 
+            refreshDashboardStats();
+
            txtMemberName.setText("");
            txtMemberSurname.setText("");
            txtMemberTC.setText("");
@@ -232,6 +269,9 @@ public class LibrarySystemUI extends JFrame {
                      boolean success = new MemberDAO().DeleteMember(member.getId());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Üye başarıyla silindi!");
+
+                        refreshDashboardStats();
+
                         txtMemberName.setText("");
                         txtMemberSurname.setText("");
                         txtMemberTC.setText("");
@@ -443,6 +483,8 @@ public class LibrarySystemUI extends JFrame {
                 if (sonuc) {
                     JOptionPane.showMessageDialog(this, "Kitap kaydedildi!");
 
+                    refreshDashboardStats();
+
                     txtIsbn.setText("");
                     txtBookName.setText("");
                     txtBookAuthorName.setText("");
@@ -517,6 +559,8 @@ public class LibrarySystemUI extends JFrame {
 
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Silindi!");
+
+                        refreshDashboardStats();
 
                         txtIsbn.setText("");
                         txtBookName.setText("");
@@ -835,10 +879,6 @@ public class LibrarySystemUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Yazar Adı boş olamaz!");
                 return;
             }
-            if (authorSurname.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Yazar Soyadı boş olamaz!");
-                return;
-            }
 
             try {
                 String name = txtAuthorName.getText();
@@ -847,6 +887,7 @@ public class LibrarySystemUI extends JFrame {
 
                 if (authorDAO.addAuthor(name, surname, biography)) {
                     JOptionPane.showMessageDialog(this, "Yazar başarıyla kaydedildi.");
+                    refreshDashboardStats();
                     txtAuthorName.setText("");
                     txtAuthorSurname.setText("");
                     txtBiography.setText("");
@@ -916,6 +957,7 @@ public class LibrarySystemUI extends JFrame {
                     boolean success = new AuthorDAO().DeleteAuthor(a.getAuthor_name());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Yazar başarıyla silindi!");
+                        refreshDashboardStats();
                         txtAuthorName.setText("");
                         txtAuthorSurname.setText("");
                         txtBiography.setText("");
@@ -1009,6 +1051,7 @@ public class LibrarySystemUI extends JFrame {
         btnAddEmployee.addActionListener(e -> {
             if (employeeDAO.addEmployee(txtEmployeeName.getText(), txtEmployeeSurname.getText(), txtEmployeeTC.getText(), txtEmployeePass.getText()))
                 JOptionPane.showMessageDialog(this, "Çalışan başarıyla eklendi!");
+            refreshDashboardStats();
 
             txtEmployeeName.setText("");
             txtEmployeeSurname.setText("");
@@ -1084,6 +1127,7 @@ public class LibrarySystemUI extends JFrame {
                     boolean success = new EmployeeDAO().DeleteEmployee(employees.getId());
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Çalışan başarıyla silindi!");
+                        refreshDashboardStats();
                       txtEmployeeName.setText("");
                         txtEmployeeSurname.setText("");
                         txtEmployeeTC.setText("");
@@ -1191,4 +1235,25 @@ public class LibrarySystemUI extends JFrame {
 
         return card;
     }
+
+    public void refreshDashboardStats() {
+        try {
+            // Veritabanından güncel sayıları çekiyoruz (DAO sınıflarınızda bu metotlar olmalı)
+            int totalBooks = bookDAO.getTotalBookCount();
+            int totalAuthors = authorDAO.getTotalAuthorCount();
+            int totalMembers = memberDAO.getTotalMemberCount();
+            int totalEmployees = employeeDAO.getTotalEmployeeCount();
+
+            lblTotalBooks.setText(String.valueOf(totalBooks));
+            lblTotalAuthors.setText(String.valueOf(totalAuthors));
+            lblTotalMembers.setText(String.valueOf(totalMembers));
+            lblTotalEmployees.setText(String.valueOf(totalEmployees));
+
+
+        } catch (Exception e) {
+            System.out.println("Panel güncellenirken hata: " + e.getMessage());
+        }
+
+    }
+
 }
