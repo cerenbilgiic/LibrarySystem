@@ -666,6 +666,12 @@ public class LibrarySystemUI extends JFrame {
                     return;
                 }
 
+                // Üyenin kitap alma hakkını kontrol et
+                if (m.getMaxAllowedbooks() <= 0) {
+                    JOptionPane.showMessageDialog(this, "Hata: Üyenin kitap alma hakkı dolmuştur! (Maksimum 6 kitap)", "Limit Dolu", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 if (loanDAO.issueLoan(m.getId(), b.getId())) {
                     JOptionPane.showMessageDialog(this, "Kitap başarıyla ödünç verildi!");
                     txtBorrow_MemberTC.setText("");

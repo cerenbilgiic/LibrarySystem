@@ -14,6 +14,10 @@ public class member extends users {
         this.maxAllowedbooks = maxAllowedbooks;
     }
 
+    public int getMaxAllowedbooks() {
+        return maxAllowedbooks;
+    }
+
     @Override
     public boolean login() {
         System.out.println(getFullName() + " isimli üye başarıyla giriş yaptı.");
