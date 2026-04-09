@@ -21,8 +21,10 @@ public class BookDAO {
         }
         return false;
     }
+
+    //kitap ekleme
     public boolean addBook(books book) {
-        String sql = "INSERT INTO books (isbn, name, publish_year,author_id, category_id,stock) VALUES ( ?, ?, ?, ?,?,?)";
+        String sql = "INSERT INTO books (isbn, name, publish_year,author_id, category_id,stock,publishier) VALUES ( ?, ?, ?, ?,?,?,?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -33,6 +35,7 @@ public class BookDAO {
             pstmt.setInt(4, book.getAuthorId());
             pstmt.setInt(5, book.getCategoryId());
             pstmt.setInt(6,book.getStock());
+            pstmt.setString(7,book.getPublishier());
 
             return pstmt.executeUpdate() > 0;
 
@@ -43,47 +46,6 @@ public class BookDAO {
         return false;
     }
 
-    // 2. Kitap Arama
-    public books getBookByName(String bookName) {
-        String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
-                "b.author_id, b.category_id, b.stock, " +
-                "a.author_name, a.author_surname, c.category_name " +
-                "FROM books b " +
-                "LEFT JOIN authors a ON b.author_id = a.id " +
-                "LEFT JOIN categories c ON b.category_id = c.id " +
-                "WHERE LOWER(b.name) LIKE LOWER(?)";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, bookName.trim());
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                books foundBook = new books(
-                        rs.getInt("id"),
-                        rs.getString("isbn"),
-                        rs.getString("name"),
-                        rs.getDate("publish_year").toLocalDate(),
-                        rs.getInt("author_id"),
-                        rs.getInt("category_id"),
-                        rs.getString("author_name"),
-                        rs.getString("author_surname"),
-                        rs.getInt("stock")
-                );
-
-                foundBook.setCategory_name(rs.getString("category_name"));
-                return foundBook;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Kitap getirme hatası: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
     //kitap silme
     public boolean deleteBook(int bookId) {
         Connection conn = null;
@@ -91,7 +53,7 @@ public class BookDAO {
         try {
             conn = DBConnection.getConnection();
 
-            // 1. Aktif loan kontrolü
+            // Aktif ödünç kaydı kontrolü
             String checkSql = "SELECT COUNT(*) FROM loans WHERE book_id = ? AND status != 'iade edildi'";
             PreparedStatement psCheck = conn.prepareStatement(checkSql);
             psCheck.setInt(1, bookId);
@@ -102,19 +64,19 @@ public class BookDAO {
                 return false;
             }
 
-            // 2. fines sil (önce bu!)
+            // cezayı siler
             String deleteFines = "DELETE FROM fines WHERE loan_id IN (SELECT id FROM loans WHERE book_id = ?)";
             PreparedStatement psFines = conn.prepareStatement(deleteFines);
             psFines.setInt(1, bookId);
             psFines.executeUpdate();
 
-            // 3. loans sil
+            // ödünç kaydını siler
             String deleteLoans = "DELETE FROM loans WHERE book_id = ?";
             PreparedStatement psLoans = conn.prepareStatement(deleteLoans);
             psLoans.setInt(1, bookId);
             psLoans.executeUpdate();
 
-            // 4. book sil
+            //kitabı siler
             String deleteBook = "DELETE FROM books WHERE id = ?";
             PreparedStatement psBook = conn.prepareStatement(deleteBook);
             psBook.setInt(1, bookId);
@@ -126,7 +88,7 @@ public class BookDAO {
             return false;
         }
     }
-
+    //toplam kayıtlı kitap sayısı
     public int getTotalBookCount() {
         String sql = "SELECT COUNT(*) FROM books";
         try (Connection conn = DBConnection.getConnection();
@@ -139,7 +101,7 @@ public class BookDAO {
     //kitap arama.
     public books getBookByIsbn(String isbn) {
         String sql = "SELECT b.id, b.isbn, b.name, b.publish_year, " +
-                "b.author_id, b.category_id, b.stock, " +
+                "b.author_id, b.category_id, b.stock, b.publisher, " +
                 "a.author_name, a.author_surname, c.category_name " +
                 "FROM books b " +
                 "LEFT JOIN authors a ON b.author_id = a.id " +
@@ -162,7 +124,8 @@ public class BookDAO {
                         rs.getInt("category_id"),
                         rs.getString("author_name"),
                         rs.getString("author_surname"),
-                        rs.getInt("stock")
+                        rs.getInt("stock"),
+                        rs.getString("publishier")
                 );
 
                 foundBook.setCategory_name(rs.getString("category_name"));
@@ -177,8 +140,8 @@ public class BookDAO {
     }
 
     //kitap güncelleme
-    public boolean updateBook(int bookId, String isbn, String name, int authorId, int categoryId, int stock) {
-        String sql = "UPDATE books SET isbn = ?, name = ?, author_id = ?, category_id = ?, stock = ? WHERE id = ?";
+    public boolean updateBook(int bookId, String isbn, String name, int authorId, int categoryId, int stock, String publishier) {
+        String sql = "UPDATE books SET isbn = ?, name = ?, author_id = ?, category_id = ?, stock = ? , publishier= ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -189,6 +152,7 @@ public class BookDAO {
             pstmt.setInt(4, categoryId);
             pstmt.setInt(5, stock);
             pstmt.setInt(6, bookId);
+            pstmt.setString(7,publishier);
 
             return pstmt.executeUpdate() > 0;
 

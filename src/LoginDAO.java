@@ -15,12 +15,10 @@ public class LoginDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String role = rs.getString("role");
-                // Rolü "Kütüphane Üyesi" olanlar giriş yapamaz.
-                // Kütüphane Çalışanı , Çalışan , Yönetici vs. giriş yapabilir.
                 if (role != null && (role.equalsIgnoreCase("Kütüphane Üyesi") || role.equalsIgnoreCase("Üye"))) {
                     return false; // Üyelerin giriş izni yok
                 }
-                return true; // Kullanıcı bulundu ve üye değil (çalışan), giriş yapabilir
+                return true;
             }
             return false;
 

@@ -4,7 +4,7 @@ public class authors {
     private String author_surname;
     private String biography;
 
-    //Bu kod bloğu constructordur. Bu sayede bir yazarın her özelliğini tek tek tanımalamak gerekmez.
+    // constructor,yazarın her özelliğini tek tek tanımalamak gerekmez
 
     public authors(int id, String author_name, String author_surname, String biography){
         this.id = id;
@@ -12,7 +12,7 @@ public class authors {
         this.author_surname = author_surname;
         this.biography = biography;
     }
-//verileri doğrudan dışarıya açmak yerine kontrollü erişmeyi sağlayan kod bloğu.
+//verilerin kontrollü erişimi.
 
     public int getId() {return id ;}
     public void setId(int id) {this.id = id ;}

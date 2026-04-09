@@ -24,7 +24,7 @@ public class AuthorDAO {
         return false;
     }
 
-    // 1. Veritabanına Yeni Yazar Ekleme İşlemi (CREATE)
+    // yazar ekleme işlemi
     public boolean addAuthor(String authorName, String authorSurname, String biography) {
         String sql = "INSERT INTO authors (author_name, author_surname, biography) VALUES (?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
@@ -37,25 +37,6 @@ public class AuthorDAO {
             e.printStackTrace();
             return false;
         }
-    }
-
-    // 2. Sistemdeki Tüm Yazarları Getirme İşlemi (READ ALL)
-    public List<authors> getAllAuthors() {
-        List<authors> authorList = new ArrayList<>();
-        String sql = "SELECT * FROM authors";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                authorList.add(new authors(
-                        rs.getInt("id"),
-                        rs.getString("author_name"),
-                        rs.getString("author_surname"),
-                        rs.getString("biography")
-                ));
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return authorList;
     }
 
     //Yazar arama.
@@ -106,7 +87,7 @@ public class AuthorDAO {
             return false;
         }
     }
-    // Yazarı Güncelleme İşlemi (UPDATE)
+    // Yazarı Güncelleme
     public boolean updateAuthor(int id, String authorName, String authorSurname, String biography) {
         String sql = "UPDATE authors SET author_name = ?, author_surname = ?, biography = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -121,24 +102,7 @@ public class AuthorDAO {
             return false;
         }
     }
-
-    // 4. (YENİ) Sadece Girilen ID'ye Ait Yazarı Getirme İşlemi (READ SINGLE)
-    public authors getAuthorById(int id) {
-        String sql = "SELECT * FROM authors WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) { // Yazar bulunduysa nesne olarak döndür
-                return new authors(
-                        rs.getInt("id"), rs.getString("author_name"),
-                        rs.getString("author_surname"), rs.getString("biography")
-                );
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return null; // Yazar yoksa boş (null) döner
-    }
-
+    //kayıtlı toplam yazarı göstermeye yarar.
     public int getTotalAuthorCount() {
         String sql = "SELECT COUNT(*) FROM authors";
         try (Connection conn = DBConnection.getConnection();

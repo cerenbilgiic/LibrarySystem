@@ -19,7 +19,7 @@ public class CategoryDAO {
         }
     }
 
-    // 2. Kategori Güncelleme
+    // Kategori Güncelleme
     public boolean updateCategory(int id, String name, String description) {
         String sql = "UPDATE categories SET category_name = ?, description = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();

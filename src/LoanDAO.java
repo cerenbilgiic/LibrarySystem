@@ -9,14 +9,14 @@ public class LoanDAO {
     public LoanDAO() {
     }
 
-    // 1. Ödünç Verme İşlemi
+    //  Ödünç Verme İşlemi
     public boolean issueLoan(int userId, int bookId) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. ADIM: Kitabın stoğunu kontrol et
+            // Kitabın stoğunu kontrol et
             String stockCheck = "SELECT stock FROM books WHERE id = ?";
             PreparedStatement psStock = conn.prepareStatement(stockCheck);
             psStock.setInt(1, bookId);
@@ -30,7 +30,7 @@ public class LoanDAO {
                 ResultSet rsUser = psUser.executeQuery();
 
                 if (rsUser.next() && rsUser.getInt("maxAllowedbooks") > 0) {
-                    // 2. ADIM: Loans tablosuna kaydet
+                    //ödünç tablosuna kaydet
                     String insertLoan = "INSERT INTO loans (user_id, book_id, loan_date, due_date, status) VALUES (?, ?, ?, ?, 'Ödünç Verildi')";
                     PreparedStatement psLoan = conn.prepareStatement(insertLoan);
 
@@ -42,13 +42,13 @@ public class LoanDAO {
                     psLoan.setDate(4, java.sql.Date.valueOf(newLoan.getDueDate()));
                     psLoan.executeUpdate();
 
-                    // 3. ADIM: Kitap stok sayısını 1 azalt
+                    //kitap stok sayısını 1 azalt
                     String updateStock = "UPDATE books SET stock = stock - 1 WHERE id = ?";
                     PreparedStatement psUpdate = conn.prepareStatement(updateStock);
                     psUpdate.setInt(1, bookId);
                     psUpdate.executeUpdate();
 
-                    // YENİ ADIM: Kullanıcının kitap alma hakkını 1 azalt
+                    //maxallowedbooks 1 azalt
                     String updateUser = "UPDATE users SET maxAllowedbooks = maxAllowedbooks - 1 WHERE id = ?";
                     PreparedStatement psUpdateUser = conn.prepareStatement(updateUser);
                     psUpdateUser.setInt(1, userId);
@@ -76,7 +76,7 @@ public class LoanDAO {
         }
     }
 
-    // 2. Ceza Sorgulama (İade İşleminden Önce)
+    //Ceza Sorgulama
     public double getPendingFineAmount(int userId, int bookId) {
         String sql = "SELECT due_date FROM loans WHERE user_id = ? AND book_id = ? AND status = 'Ödünç Verildi'";
         try (Connection conn = DBConnection.getConnection();
@@ -102,7 +102,7 @@ public class LoanDAO {
         return -1.0; // Aktif kayıt yok
     }
 
-    // 3. İade ve Ceza Tahsilat İşlemini Tamamlama
+    // İade İşlemini Tamamlama
     public boolean processReturn(int userId, int bookId, double fineAmount) {
         Connection conn = null;
         try {
@@ -131,7 +131,7 @@ public class LoanDAO {
                 psUpdateStock.setInt(1, bookId);
                 psUpdateStock.executeUpdate();
 
-                // YENİ ADIM: Kullanıcının kitap alma hakkını 1 artır
+                // Kullanıcının kitap alma hakkını 1 artır
                 String updateUser = "UPDATE users SET maxAllowedbooks = maxAllowedbooks + 1 WHERE id = ?";
                 PreparedStatement psUpdateUser = conn.prepareStatement(updateUser);
                 psUpdateUser.setInt(1, userId);

@@ -9,7 +9,7 @@ public class LibrarySystemUI extends JFrame {
     private JPanel cardPanel;
     private CardLayout cardLayout;
     private JTextField txtMemberName, txtMemberSurname, txtMemberTC;
-    private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography;
+    private JTextField txtIsbn, txtBookName, txtAuthorName, txtAuthorSurname,txtBiography,txtPublishier;
     private JTextField txtMemberId, txtBookId,txtCategoryId, txtAuthorId, txtCatNameIn , txtStock;
     private JButton btnSearchBook;
     private JComboBox<String> selectCategory;
@@ -308,6 +308,8 @@ public class LibrarySystemUI extends JFrame {
             case "Din/Teoloji" : return 13;
             case "Çizgi Roman" : return 14;
             case "Eğitim" : return 15;
+            case "Romantik": return 16;
+            case "Türk Klasikleri" : return 17;
             default: return 0;
         }
     }
@@ -329,6 +331,8 @@ public class LibrarySystemUI extends JFrame {
             case 13 : return "Din/Teoloji" ;
             case 14 : return "Çizgi Roman" ;
             case 15 : return "Eğitim" ;
+            case 16 : return "Romantik";
+            case 17:return "Türk Klasikleri";
             default: return null;
         }
     }
@@ -344,6 +348,7 @@ public class LibrarySystemUI extends JFrame {
         txtBookAuthorName = new JTextField(15);
         txtBookAuthorSurname = new JTextField(15);
         txtStock = new JTextField(15);
+        txtPublishier = new JTextField(15);
 
         int publish_year = LocalDate.now().getYear();
         SpinnerModel yearModel = new SpinnerNumberModel(publish_year, 1800, publish_year + 1, 1);
@@ -352,7 +357,7 @@ public class LibrarySystemUI extends JFrame {
         JSpinner.NumberEditor editor = new JSpinner.NumberEditor(spinYear, "#");
         spinYear.setEditor(editor);
 
-        String[] categories = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım"};
+        String[] categories = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım","Bilim Kurgu","Fantastik","Suç","Şiir","Tarih","Felsefe","Psikoloji","Din/Teoloji","Çizgi Roman","Eğitim","Romantik","Türk Klasikleri"};
         selectCategory = new JComboBox<>(categories);
 
 
@@ -379,6 +384,9 @@ public class LibrarySystemUI extends JFrame {
         addComponent(panel, new JLabel("Yayın Yılı:"), 0, 6, gbc);
         addComponent(panel, spinYear, 1, 6, gbc);
 
+        addComponent(panel,new JLabel("Yayın Evi: "),0,7,gbc);
+        addComponent(panel, txtPublishier,1,7,gbc);
+
         //  kitap ekleme işlemi
         JButton btnAddBook = new JButton("Kitabı Kaydet");
         btnAddBook.setBackground(new Color(116, 185, 255));
@@ -394,6 +402,7 @@ public class LibrarySystemUI extends JFrame {
             String authorSurname = txtBookAuthorSurname.getText().trim();
             String stockInput = txtStock.getText().trim();
             int stockAmount = stockInput.isEmpty() ? 1 : Integer.parseInt(stockInput);
+            String publishier = txtPublishier.getText().trim();
 
             if (bookname.isEmpty()) {JOptionPane.showMessageDialog(this, "Kitap Adı boş olamaz!");return;}
             if (authorName.isEmpty()) {JOptionPane.showMessageDialog(this, "Yazar Adı boş olamaz!");return;}
@@ -427,7 +436,8 @@ public class LibrarySystemUI extends JFrame {
                         categoryId,
                         authorName,
                         authorSurname,
-                        stockAmount
+                        stockAmount,
+                        publishier
                 );
                 boolean sonuc = bookDAO.addBook(book);
                 if (sonuc) {
@@ -439,6 +449,7 @@ public class LibrarySystemUI extends JFrame {
                     txtBookAuthorSurname.setText("");
                     selectCategory.setSelectedIndex(0);
                     txtStock.setText("");
+                    txtPublishier.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "Kayıt başarısız!");
                 }
@@ -448,7 +459,7 @@ public class LibrarySystemUI extends JFrame {
             }
         });
 
-        addComponent(panel, btnAddBook, 1, 7, gbc);
+        addComponent(panel, btnAddBook, 1, 8, gbc);
 
     //kitap arama
         JButton btnSearchBook = new JButton("Kitap Ara");
@@ -470,13 +481,14 @@ public class LibrarySystemUI extends JFrame {
 
                 selectCategory.setSelectedItem(getCategoryNameById(foundBook.getCategoryId()));
                 txtStock.setText(String.valueOf(foundBook.getStock()));
+                txtPublishier.setText(foundBook.getPublishier());
 
                 JOptionPane.showMessageDialog(this, "Kitap bulundu!");
             } else {
                 JOptionPane.showMessageDialog(this, "Kitap bulunamadı!");
             }
         });
-        addComponent(panel, btnSearchBook, 0, 7, gbc);
+        addComponent(panel, btnSearchBook, 0, 8, gbc);
 
         //kitap silme işlemi
         JButton btndeleteBook = new JButton("Kitabı Sil");
@@ -512,13 +524,14 @@ public class LibrarySystemUI extends JFrame {
                         txtBookAuthorSurname.setText("");
                         selectCategory.setSelectedIndex(0);
                         txtStock.setText("");
+                        txtPublishier.setText("");
                     } else {
                         JOptionPane.showMessageDialog(this, "Silinemedi!");
                     }
                 }
             }
         });
-        addComponent(panel, btndeleteBook, 3, 7, gbc);
+        addComponent(panel, btndeleteBook, 3, 8, gbc);
 
 
         //kitap düzenleme işlemi
@@ -540,8 +553,9 @@ public class LibrarySystemUI extends JFrame {
                     JTextField txtNameEdit = new JTextField(exBook.getBook_name());
                     JTextField txtAuthNameEdit = new JTextField(exBook.getAuthorName());
                     JTextField txtAuthSurnameEdit = new JTextField(exBook.getAuthorSurname());
+                    JTextField txtPublishierEdit = new JTextField(exBook.getPublishier());
 
-                    String[] categoriesList = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım" , "Bilim Kurgu", "Fantastik" , "Suç","Şiir","Tarih", "Felsefe", "Psikoloji" ,"Din/Teoloji","Çizgi Roman", "Eğitim"};
+                    String[] categoriesList = {"Roman", "Masal", "Biyografi", "Otobiyografi", "Yazılım" , "Bilim Kurgu", "Fantastik" , "Suç","Şiir","Tarih", "Felsefe", "Psikoloji" ,"Din/Teoloji","Çizgi Roman", "Eğitim","Romantik","Türk Klasikleri"};
                     JComboBox<String> comboCatEdit = new JComboBox<>(categoriesList);
                     comboCatEdit.setSelectedItem(getCategoryNameById(exBook.getCategoryId()));
                     String foundCat = exBook.getCategory_name();
@@ -563,12 +577,14 @@ public class LibrarySystemUI extends JFrame {
                             "Yazar Soyadı:", txtAuthSurnameEdit,
                             "Kategori:", comboCatEdit,
                             "Kitap Stoğu:", txtStockEdit,
-                            "Yayın Tarihi: ",spinYearEdit
+                            "Yayın Tarihi: ",spinYearEdit,
+                            "Yayın Evi: ", txtPublishierEdit
                     };
 
                     int option = JOptionPane.showConfirmDialog(this, message, "Kitap Bilgilerini Güncelle", JOptionPane.OK_CANCEL_OPTION);
                     if (option == JOptionPane.OK_OPTION) {
                         int updatedYear = (int) spinYearEdit.getValue();
+                        String publishierEdit = txtPublishierEdit.getText();
                         try {
                             String updatedIsbn = txtIsbnEdit.getText().trim();
                             if (updatedIsbn.length() != 13) {
@@ -590,7 +606,9 @@ public class LibrarySystemUI extends JFrame {
                                     txtNameEdit.getText(),
                                     newAuthor.getId(),
                                     getCategoryId((String)comboCatEdit.getSelectedItem()),
-                                    newStockAmount
+                                    newStockAmount,
+                                    publishierEdit
+
                             );
 
                             if (success) {
@@ -607,7 +625,7 @@ public class LibrarySystemUI extends JFrame {
                 }
             }
         });
-        addComponent(panel, btnupdateBook, 1, 8, gbc);
+        addComponent(panel, btnupdateBook, 1, 9, gbc);
         return panel;
     }
 
@@ -668,7 +686,7 @@ public class LibrarySystemUI extends JFrame {
 
                 // Üyenin kitap alma hakkını kontrol et
                 if (m.getMaxAllowedbooks() <= 0) {
-                    JOptionPane.showMessageDialog(this, "Hata: Üyenin kitap alma hakkı dolmuştur! (Maksimum 6 kitap)", "Limit Dolu", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Hata: Üyenin kitap alma hakkı dolmuştur! (Maksimum 5 kitap)", "Limit Dolu", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
