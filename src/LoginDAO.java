@@ -31,7 +31,7 @@ public class LoginDAO {
     public String getUserFullName(String tc) {
         String sql = "SELECT first_name, last_name FROM users WHERE tc = ?";
 
-        try (Connection conn = DBConnection.getConnection(); 
+        try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, tc);

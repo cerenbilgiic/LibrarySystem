@@ -36,7 +36,7 @@ public class books {
 
     public int getId() { return id; }
     public String getIsbn() { return isbn; }
-    public String getBook_name() { return bookName; } // UI'da b.getBook_name() dediğin için burayı böyle yapabilirsin
+    public String getBook_name() { return bookName; }
     public LocalDate getPurchase_date() { return purchaseDate; }
     public int getAuthorId(){return authorId ;}
     public int getCategoryId(){return categoryId ;}

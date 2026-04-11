@@ -446,7 +446,6 @@ public class LibrarySystemUI extends JFrame {
 
             if (bookname.isEmpty()) {JOptionPane.showMessageDialog(this, "Kitap Adı boş olamaz!");return;}
             if (authorName.isEmpty()) {JOptionPane.showMessageDialog(this, "Yazar Adı boş olamaz!");return;}
-            if (authorSurname.isEmpty()) {JOptionPane.showMessageDialog(this, "Yazar Soyadı boş olamaz!");return;}
             if (isbn.isEmpty()) {JOptionPane.showMessageDialog(this, "ISBN boş olamaz!");return;}
             if (isbn.length() != 13) {JOptionPane.showMessageDialog(this, "Hata: ISBN tam olarak 13 karakterden (haneden) oluşmalıdır!", "Geçersiz ISBN", JOptionPane.WARNING_MESSAGE);return;}
             if (bookDAO.isIsbnExists(isbn)) {
